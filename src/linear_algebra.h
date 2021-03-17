@@ -1,5 +1,6 @@
 #ifndef LINEAR_ALGEBRA_H
 #define LINEAR_ALGEBRA_H
+#include <stdio.h>
 
 struct matrix {
   double* data;
@@ -15,7 +16,9 @@ double* matrix_element(struct matrix* A, unsigned row, unsigned col);
 
 double matrix_value(struct matrix* A, unsigned row, unsigned col);
 
-char* matrix_asString(struct matrix* A);
+void matrix_print(struct matrix* A);
+
+size_t matrix_size(struct matrix* A);
 
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 
 

@@ -9,10 +9,18 @@ struct matrix* matrix_new(unsigned rows, unsigned cols, double initVal) {
   for(unsigned i = 0; i < rows * cols; i++) {
     A->data[i] = initVal;
   }
+  A->rows = rows;
+  A->cols = cols;
   return A;
 }
 
+void matrix_delete(struct matrix* A) {
+  free(A->data);
+}
+
 double* matrix_element(struct matrix* A, unsigned row, unsigned col) {
+  assert(row < A->rows);
+  assert(col < A->cols);
   return A->data + col * A->rows + row;
 }
 
@@ -35,6 +43,9 @@ struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
   return *ret;
 }
 
+size_t matrix_size(struct matrix* A) {
+  return sizeof(struct matrix) + A->rows * A->cols * sizeof(double);
+}
 
 void matrix_print(struct matrix* A) {
   for(unsigned i = 0; i < A->rows; i++) {

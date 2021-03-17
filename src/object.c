@@ -3,43 +3,51 @@
 
 struct object* new_square(unsigned x, unsigned y, unsigned width) {
   struct object* o = malloc(sizeof(struct object));
-  o->points = malloc(4 * 2 * sizeof(unsigned));
-  o->points[0 + 0 * 2] = x;
-  o->points[1 + 0 * 2] = y;
-  o->points[0 + 1 * 2] = x+width;
-  o->points[1 + 1 * 2] = y;
-  o->points[0 + 2 * 2] = x+width;
-  o->points[1 + 2 * 2] = y-width;
-  o->points[0 + 3 * 2] = x;
-  o->points[1 + 3 * 2] = y-width;
-  o->nPoints = 4;
+  o->points = *matrix_new(2, 4, 0.0);
+  *matrix_element(&o->points, 0, 0) = x;
+  *matrix_element(&o->points, 1, 0) = y;
+  *matrix_element(&o->points, 0, 1) = x + width;
+  *matrix_element(&o->points, 1, 1) = y;
+  *matrix_element(&o->points, 0, 2) = x + width;
+  *matrix_element(&o->points, 1, 2) = y - width;
+  *matrix_element(&o->points, 0, 3) = x;
+  *matrix_element(&o->points, 1, 3) = y - width;
   o->color.r = 255;
   o->color.g = 255;
   o->color.b = 255;
   return o;
 }
 
-void delete_object(struct object* o) {
-  free(o->points);
+void object_delete(struct object* o) {
+  matrix_delete(&o->points);
 }
 
-void render_object(struct object* o, SDL_Renderer* renderer) {
+
+unsigned object_nPoints(struct object* o) {
+  return o->points.cols;
+}
+double* object_point(struct object* o, unsigned i) {
+  return o->points.data + i * o->points.rows;
+}
+
+void object_render(struct object* o, SDL_Renderer* renderer) {
   SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
-  for(unsigned i = 0; i < o->nPoints - 1; i++) {
-    SDL_RenderDrawLine(renderer, o->points[0 + i * 2], o->points[1 + i * 2], o->points[0 + (i + 1) * 2], o->points[1 + (i + 1) * 2]);
+  unsigned N = object_nPoints(o);
+  for(unsigned i = 0; i < N - 1; i++) {
+    SDL_RenderDrawLine(renderer, object_point(o, i)[0], object_point(o, i)[1], object_point(o, i + 1)[0], object_point(o, i + 1)[1]);
   }
-  SDL_RenderDrawLine(renderer, o->points[0 + (o->nPoints-1) * 2], o->points[1 + (o->nPoints-1) * 2], o->points[0 + 0 * 2], o->points[1 + 0 * 2]);
+  SDL_RenderDrawLine(renderer, object_point(o, N-1)[0], object_point(o, N-1)[1], object_point(o, 0)[0], object_point(o, 0)[1]);
 }
 
 
 size_t object_size(struct object* o) {
-  return sizeof(struct object) + o->nPoints * 2 * sizeof(unsigned);
+  return sizeof(struct object) + matrix_size(&o->points);
 }
 
-void print_object(struct object* o) {
+void object_print(struct object* o) {
   printf("points:\n");
-  for(unsigned i = 0; i < o->nPoints; i++) {
-    printf("\t(%d, %d)\n", o->points[0 + i * 2], o->points[1 + i * 2]);
+  for(unsigned i = 0; i < object_nPoints(o); i++) {
+    printf("\t(%f, %f)\n", object_point(o, i)[0], object_point(o, i)[1]);
   }
 }
 

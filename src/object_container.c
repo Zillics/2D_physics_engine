@@ -11,7 +11,7 @@ struct object_container* new_object_container() {
 
 void delete_object_container(struct object_container* oc) {
   for(unsigned i = 0; i < oc->nObjects; i++) {
-    delete_object(oc->objects + i);
+    object_delete(oc->objects + i);
   }
   free(oc);
 }
@@ -32,6 +32,6 @@ void pop_object(struct object_container* oc, unsigned i) {
 
 void render_objects(struct object_container* oc, SDL_Renderer* renderer) {
   for(unsigned int i = 0; i < oc->nObjects; i++) {
-    render_object(oc->objects + i, renderer);
+    object_render(oc->objects + i, renderer);
   }
 }

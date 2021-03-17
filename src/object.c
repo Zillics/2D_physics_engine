@@ -3,39 +3,44 @@
 
 struct object* new_square(unsigned x, unsigned y, unsigned width) {
   struct object* o = malloc(sizeof(struct object));
-  o->points = malloc(4*sizeof(struct point));
-  o->points[0].x = x;
-  o->points[0].y = y;
-  o->points[1].x = x+width;
-  o->points[1].y = y;
-  o->points[2].x = x+width;
-  o->points[2].y = y-width;
-  o->points[3].x = x;
-  o->points[3].y = y-width;
+  o->points = malloc(4 * 2 * sizeof(unsigned));
+  o->points[0 + 0 * 2] = x;
+  o->points[1 + 0 * 2] = y;
+  o->points[0 + 1 * 2] = x+width;
+  o->points[1 + 1 * 2] = y;
+  o->points[0 + 2 * 2] = x+width;
+  o->points[1 + 2 * 2] = y-width;
+  o->points[0 + 3 * 2] = x;
+  o->points[1 + 3 * 2] = y-width;
   o->nPoints = 4;
+  o->color.r = 255;
+  o->color.g = 255;
+  o->color.b = 255;
   return o;
 }
 
 void delete_object(struct object* o) {
-  free(o);
+  free(o->points);
 }
 
 void render_object(struct object* o, SDL_Renderer* renderer) {
-  SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+  SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
   for(unsigned i = 0; i < o->nPoints - 1; i++) {
-    SDL_RenderDrawLine(renderer, (o->points + i)->x, (o->points + i)->y, (o->points + i + 1)->x, (o->points + i + 1)->y);
+    SDL_RenderDrawLine(renderer, o->points[0 + i * 2], o->points[1 + i * 2], o->points[0 + (i + 1) * 2], o->points[1 + (i + 1) * 2]);
   }
-  SDL_RenderDrawLine(renderer, (o->points + o->nPoints - 1)->x, (o->points + o->nPoints - 1)->y, o->points->x, o->points->y);
+  SDL_RenderDrawLine(renderer, o->points[0 + (o->nPoints-1) * 2], o->points[1 + (o->nPoints-1) * 2], o->points[0 + 0 * 2], o->points[1 + 0 * 2]);
 }
 
 
 size_t object_size(struct object* o) {
-  return sizeof(struct object) + o->nPoints * sizeof(struct point);
+  return sizeof(struct object) + o->nPoints * 2 * sizeof(unsigned);
 }
 
 void print_object(struct object* o) {
   printf("points:\n");
-  print_points(o->points, o->nPoints); 
+  for(unsigned i = 0; i < o->nPoints; i++) {
+    printf("\t(%d, %d)\n", o->points[0 + i * 2], o->points[1 + i * 2]);
+  }
 }
 
 

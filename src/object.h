@@ -1,12 +1,13 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "point.h"
 #include <SDL2/SDL.h>
+#include "color.h"
 
 struct object {
-  struct point* points;
+  unsigned *points;
   unsigned nPoints;
+  struct color color;
 };
 
 struct object* new_square(unsigned x, unsigned y, unsigned width);

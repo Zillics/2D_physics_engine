@@ -36,8 +36,17 @@ double* matrix_col(struct matrix* A, unsigned i) {
   return A->data + i * A->rows;
 }
 
+struct matrix rotation_matrix(double rad) {
+  struct matrix* R = matrix_new(2, 2, 0.0);
+  *matrix_element(R, 0, 0) = cos(rad);
+  *matrix_element(R, 0, 1) = -sin(rad);
+  *matrix_element(R, 1, 0) = sin(rad);
+  *matrix_element(R, 1, 1) = cos(rad); 
+  return *R;
+}
+
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
-  assert(A->rows == B->cols);
+  assert(A->cols == B->rows);
   struct matrix* ret = matrix_new(A->rows, B->cols, 0);
   for(unsigned i = 0; i < A->rows; i++) {
     for(unsigned j = 0; j < B->cols; j++) {

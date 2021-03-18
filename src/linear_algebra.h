@@ -1,6 +1,7 @@
 #ifndef LINEAR_ALGEBRA_H
 #define LINEAR_ALGEBRA_H
 #include <stdio.h>
+#include <math.h>
 
 struct matrix {
   double* data;
@@ -23,5 +24,7 @@ void matrix_print(struct matrix* A);
 size_t matrix_size(struct matrix* A);
 
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 
+
+struct matrix rotation_matrix(double rad);
 
 #endif

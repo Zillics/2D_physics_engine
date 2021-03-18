@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "winding_number_algorithm.h"
 
+#define PI 3.141592654
+
 struct object* new_square(unsigned x, unsigned y, unsigned width) {
   struct object* o = malloc(sizeof(struct object));
   o->points = *matrix_new(2, 4, 0.0);
@@ -33,6 +35,20 @@ double* object_point(struct object* o, unsigned i) {
 
 bool object_contains(struct object* o, double* p) {
   return wn_PnPoly(p, o->points, o->points.cols) != 0;
+}
+
+void object_rotate(struct object* o, double deg) {
+  object_rotate_deg(o, deg);
+}
+
+void object_rotate_deg(struct object* o, double deg) {
+  double rad = (deg / 360) * 2 * PI;
+  object_rotate_rad(o, rad);
+}
+
+void object_rotate_rad(struct object* o, double rad) {
+  struct matrix R = rotation_matrix(rad);
+  o->points = matrix_multiply(&R, &o->points); 
 }
 
 void object_render(struct object* o, SDL_Renderer* renderer) {

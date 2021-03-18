@@ -25,7 +25,15 @@ double* matrix_element(struct matrix* A, unsigned row, unsigned col) {
 }
 
 double matrix_value(struct matrix* A, unsigned row, unsigned col) {
+  assert(row < A->rows);
+  assert(col < A->cols);
   return *(matrix_element(A, row, col));
+}
+
+
+double* matrix_col(struct matrix* A, unsigned i) {
+  assert(i < A->cols);
+  return A->data + i * A->rows;
 }
 
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {

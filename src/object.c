@@ -1,5 +1,6 @@
 #include "object.h"
 #include <stdio.h>
+#include "winding_number_algorithm.h"
 
 struct object* new_square(unsigned x, unsigned y, unsigned width) {
   struct object* o = malloc(sizeof(struct object));
@@ -28,6 +29,10 @@ unsigned object_nPoints(struct object* o) {
 }
 double* object_point(struct object* o, unsigned i) {
   return o->points.data + i * o->points.rows;
+}
+
+bool object_contains(struct object* o, double* p) {
+  return wn_PnPoly(p, o->points, o->points.cols) != 0;
 }
 
 void object_render(struct object* o, SDL_Renderer* renderer) {

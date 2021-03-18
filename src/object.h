@@ -2,6 +2,7 @@
 #define OBJECT_H
 
 #include <SDL2/SDL.h>
+#include <stdbool.h>
 #include "color.h"
 #include "linear_algebra.h"
 
@@ -16,6 +17,7 @@ void object_delete(struct object* o);
 void object_render(struct object* o, SDL_Renderer* renderer);
 unsigned object_nPoints(struct object* o);
 double* object_point(struct object* o, unsigned i);
+bool object_contains(struct object* o, double* p);
 void object_print(struct object* o);
 
 

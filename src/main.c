@@ -32,7 +32,17 @@ int main(int argc, char* argv[])
                     switch(event.type) {
                       case SDL_MOUSEBUTTONDOWN:
                         if(event.button.button == SDL_BUTTON_LEFT) {
-                          insert_square(oc, event.button.x, event.button.y, 10);
+                          insert_square(oc, event.button.x, event.button.y, 30);
+                        }
+                        if(event.button.button == SDL_BUTTON_RIGHT) {
+                          for(unsigned i = 0; i < oc->nObjects; i++) {
+                            double p[2] = {event.button.x, event.button.y};
+                            if(object_contains(oc->objects + i, p)) {
+                              printf("CLICKED INSIDE OBJECT!\n");
+                            } else {
+                              printf("CLICKED OUTSIDE\n");
+                            }
+                          }
                         }
                         break;
                       case SDL_MOUSEBUTTONUP:

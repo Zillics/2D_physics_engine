@@ -16,6 +16,8 @@ double* matrix_element(struct matrix* A, unsigned row, unsigned col);
 
 double matrix_value(struct matrix* A, unsigned row, unsigned col);
 
+double* matrix_col(struct matrix* A, unsigned i);
+
 void matrix_print(struct matrix* A);
 
 size_t matrix_size(struct matrix* A);

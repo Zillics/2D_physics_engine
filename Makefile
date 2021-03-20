@@ -1,12 +1,13 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
-TARGET_EXEC := main
-TEST_EXEC := test
 
+EXEC_DIR := ./bin
 BUILD_DIR := ./build
 SRC_DIRS := ./src
 
 # Find all the C and C++ files we want to compile
 SRCS := $(shell find $(SRC_DIRS) -maxdepth 1 -name *.c)
+EXEC_SRCS := $(shell find $(SRC_DIRS)/mains/ -maxdepth 1 -name *.c)
+EXECUTABLES := $(patsubst $(SRC_DIRS)/mains/%.c, $(EXEC_DIR)/%, $(EXEC_SRCS))
 
 # String substitution for every C/C++ file.
 # As an example, hello.cpp turns into ./build/hello.cpp.o
@@ -25,16 +26,16 @@ CFLAGS := $(shell sdl2-config --cflags)
 
 LDFLAGS := $(shell sdl2-config --libs) -lm
 
-
+all: $(EXECUTABLES)
 
 # The final build step.
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	echo "AAAAAAAAAAAA"
-	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+$(EXEC_DIR)/%: $(OBJS) $(BUILD_DIR)/src/mains/%.c.o
+	mkdir -p $(dir $@)
+	mkdir -p $(EXEC_DIR)
+	$(CC) $^ -o $@ $(LDFLAGS)
 
-# Build step for C source
+# Build step for C sources
 $(BUILD_DIR)/%.c.o: %.c
-	echo "BBBBBBBBB"
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 

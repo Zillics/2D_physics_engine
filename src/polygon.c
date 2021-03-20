@@ -6,9 +6,14 @@
 #define PI 3.141592654
 
 struct polygon* new_square(int x, int y, unsigned width) {
-  double points[4][2] = { {x, y}, {x + width, y}, { x + width, y - width }, { x, y - width } };
+  double points[4][2] = { {x - 0.5 * width, y + 0.5 * width},
+                          {x + 0.5 * width, y + 0.5 * width},
+                          {x + 0.5 * width, y - 0.5 * width},
+                          {x - 0.5 * width, y - 0.5 * width} };
   struct color clr = { .r = 255, .g = 255, .b = 255 };
   struct polygon* ret = new_polygon(4, points, clr);
+  double xMid, yMid;
+  polygon_centroid(ret, &xMid, &yMid);
   return ret;
 }
 
@@ -63,11 +68,11 @@ void polygon_rotate_deg(struct polygon* o, double deg) {
 void polygon_rotate_rad(struct polygon* o, double rad) {
   double xMid, yMid;
   polygon_centroid(o, &xMid, &yMid);
-  struct matrix T1 = translation_matrix_2D(-xMid, -yMid);
-  struct matrix R = rotation_matrix_2D(rad);
-  struct matrix T2 = translation_matrix_2D(xMid, yMid);
-  struct matrix transformations[4] = { T1, R, T2, o->points };
-  o->points = matrices_multiply(4, transformations);
+  struct matrix transformations[3] = {translation_matrix_2D(xMid, yMid),
+                                      rotation_matrix_2D(rad),
+                                      translation_matrix_2D(-xMid, -yMid)};
+  struct matrix TRT = matrices_multiply(3, transformations);
+  o->points = matrix_multiply(&TRT, &o->points);
 }
 
 void polygon_translate(struct polygon* o, double x, double y) {

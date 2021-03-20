@@ -38,7 +38,8 @@ int main(int argc, char* argv[])
                           double p[2] = {event.button.x, event.button.y};
                           for(unsigned i = 0; i < oc->nObjects; i++) {
                             if(polygon_contains(oc->polygons + i, p)) {
-                              polygon_rotate(oc->polygons + i, 10);
+                              //polygon_rotate(oc->polygons + i, 10);
+                              polygon_translate(oc->polygons + i, 0, 5);
                             } else {
                             }
                           }

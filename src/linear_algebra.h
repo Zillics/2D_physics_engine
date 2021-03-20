@@ -25,6 +25,12 @@ size_t matrix_size(struct matrix* A);
 
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 
 
-struct matrix rotation_matrix(double rad);
+struct matrix matrices_multiply(unsigned N, struct matrix matrices[N]); 
+
+struct matrix identity_matrix(unsigned dim);
+
+struct matrix rotation_matrix_2D(double rad);
+
+struct matrix translation_matrix_2D(double x, double y);
 
 #endif

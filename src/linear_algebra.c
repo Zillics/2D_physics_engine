@@ -36,13 +36,29 @@ double* matrix_col(struct matrix* A, unsigned i) {
   return A->data + i * A->rows;
 }
 
-struct matrix rotation_matrix(double rad) {
-  struct matrix* R = matrix_new(2, 2, 0.0);
+struct matrix identity_matrix(unsigned dim) {
+  struct matrix* I = matrix_new(dim, dim, 0.0);
+  for(unsigned i = 0; i < dim; i++) {
+    *matrix_element(I, i, i) = 1.0;
+  }
+  return *I;
+}
+
+struct matrix rotation_matrix_2D(double rad) {
+  struct matrix* R = matrix_new(3, 3, 0.0);
   *matrix_element(R, 0, 0) = cos(rad);
   *matrix_element(R, 0, 1) = -sin(rad);
   *matrix_element(R, 1, 0) = sin(rad);
   *matrix_element(R, 1, 1) = cos(rad); 
+  *matrix_element(R, 2, 2) = 1.0;
   return *R;
+}
+
+struct matrix translation_matrix_2D(double x, double y) {
+  struct matrix I = identity_matrix(3);
+  *matrix_element(&I, 0, 2) = x;
+  *matrix_element(&I, 1, 2) = y;
+  return I;
 }
 
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
@@ -58,6 +74,15 @@ struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
     }
   }
   return *ret;
+}
+
+struct matrix matrices_multiply(unsigned N, struct matrix matrices[N]) {
+  assert(N > 1);
+  struct matrix ret = matrices[0];
+  for(unsigned i = 1; i < N; i++) {
+    ret = matrix_multiply(&ret, &matrices[i]);
+  }
+  return ret;
 }
 
 size_t matrix_size(struct matrix* A) {

@@ -24,7 +24,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CFLAGS := $(shell sdl2-config --cflags)
 
-LDFLAGS := $(shell sdl2-config --libs) -lm
+LDFLAGS := $(shell sdl2-config --libs) -lm -lcheck
 
 all: $(EXECUTABLES)
 

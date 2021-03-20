@@ -10,7 +10,7 @@ struct polygon_container {
 
 struct polygon_container* new_polygon_container();
 void delete_polygon_container(struct polygon_container* oc);
-void insert_square(struct polygon_container* oc, unsigned x, unsigned y, unsigned width);
+void insert_square(struct polygon_container* oc, unsigned x, unsigned y, unsigned width, struct color color);
 void pop_polygon(struct polygon_container* oc, unsigned i);
 void render_polygons(struct polygon_container* oc, SDL_Renderer* renderer);
 

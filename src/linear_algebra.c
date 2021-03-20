@@ -44,6 +44,21 @@ struct matrix identity_matrix(unsigned dim) {
   return *I;
 }
 
+void matrix_rotate(struct matrix* A, double deg) {
+  matrix_rotate_deg(A, deg);
+}
+
+void matrix_rotate_deg(struct matrix* A, double deg) {
+  double rad = (deg / 360) * (2 * M_PI);
+  matrix_rotate_rad(A, rad);
+}
+
+void matrix_rotate_rad(struct matrix* A, double rad) {
+  assert(A->rows == 3);
+  struct matrix R = rotation_matrix_2D(rad);
+  *A = matrix_multiply(&R, A);
+}
+
 struct matrix rotation_matrix_2D(double rad) {
   struct matrix* R = matrix_new(3, 3, 0.0);
   *matrix_element(R, 0, 0) = cos(rad);

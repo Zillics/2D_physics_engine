@@ -5,19 +5,18 @@
 
 #define PI 3.141592654
 
-struct polygon* new_square(int x, int y, unsigned width) {
+struct polygon* new_square(int x, int y, unsigned width, struct color color) {
   double points[4][2] = { {x - 0.5 * width, y + 0.5 * width},
                           {x + 0.5 * width, y + 0.5 * width},
                           {x + 0.5 * width, y - 0.5 * width},
                           {x - 0.5 * width, y - 0.5 * width} };
-  struct color clr = { .r = 255, .g = 255, .b = 255 };
-  struct polygon* ret = new_polygon(4, points, clr);
+  struct polygon* ret = new_polygon(4, points, color);
   double xMid, yMid;
   polygon_centroid(ret, &xMid, &yMid);
   return ret;
 }
 
-struct polygon* new_polygon(unsigned nPoints, double points[nPoints][2], struct color clr) {
+struct polygon* new_polygon(unsigned nPoints, double points[nPoints][2], struct color color) {
   struct polygon* o = malloc(sizeof(struct polygon));
   o->points = *matrix_new(3, nPoints, 0.0); // 1.0 for making points homogenous
   for(unsigned i = 0; i < nPoints; i++) {
@@ -25,7 +24,7 @@ struct polygon* new_polygon(unsigned nPoints, double points[nPoints][2], struct 
     *matrix_element(&o->points, 1, i) = points[i][1];
     *matrix_element(&o->points, 2, i) = 1.0;
   }
-  o->color = clr;
+  o->color = color;
   return o;
 }
 
@@ -75,10 +74,10 @@ void polygon_rotate_rad(struct polygon* o, double rad) {
   o->points = matrix_multiply(&TRT, &o->points);
 }
 
-void polygon_translate(struct polygon* o, double x, double y) {
+void polygon_translate(struct polygon* o, double* v) {
   double xMid, yMid;
   polygon_centroid(o, &xMid, &yMid);
-  struct matrix T = translation_matrix_2D(x, y);
+  struct matrix T = translation_matrix_2D(v[0], v[1]);
   o->points = matrix_multiply(&T, &o->points);
 }
 
@@ -90,7 +89,6 @@ void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
     SDL_RenderDrawLine(renderer, polygon_point(o, i1)[0], polygon_point(o, i1)[1], polygon_point(o, i2)[0], polygon_point(o, i2)[1]);
   }
 }
-
 
 size_t polygon_size(struct polygon* o) {
   return sizeof(struct polygon) + matrix_size(&o->points);

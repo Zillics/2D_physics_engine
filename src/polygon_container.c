@@ -16,8 +16,8 @@ void delete_polygon_container(struct polygon_container* oc) {
   free(oc);
 }
 
-void insert_square(struct polygon_container* oc, unsigned x, unsigned y, unsigned width) {
-  struct polygon* o = new_square(x, y, width);
+void insert_square(struct polygon_container* oc, unsigned x, unsigned y, unsigned width, struct color color) {
+  struct polygon* o = new_square(x, y, width, color);
   size_t size = polygon_size(o);
   oc->polygons = realloc(oc->polygons, oc->mem_polygons + size);
   oc->polygons[oc->nObjects] = *o;

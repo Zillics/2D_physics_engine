@@ -23,6 +23,12 @@ void matrix_print(struct matrix* A);
 
 size_t matrix_size(struct matrix* A);
 
+void matrix_rotate(struct matrix* A, double deg);
+
+void matrix_rotate_deg(struct matrix* A, double rad);
+
+void matrix_rotate_rad(struct matrix* A, double rad);
+
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 
 
 struct matrix matrices_multiply(unsigned N, struct matrix matrices[N]); 

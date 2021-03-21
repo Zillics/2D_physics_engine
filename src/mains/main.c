@@ -9,6 +9,7 @@
 #define TRANS_INCR 2
 
 struct color default_color = GREEN;
+struct color collision_color = RED;
 
 int main(int argc, char* argv[])
 {
@@ -39,7 +40,11 @@ int main(int argc, char* argv[])
 
                 // Display all rendered stuff
                 SDL_RenderPresent(renderer);
-
+                if(polygons_collide(oc->polygons + 0, oc->polygons + 1)) {
+                  oc->polygons[0].color = default_color;
+                } else {
+                  oc->polygons[0].color = collision_color;
+                }
                 while (SDL_PollEvent(&event)) {
                     switch(event.type) {
                       case SDL_MOUSEBUTTONDOWN:

@@ -109,20 +109,22 @@ void polygon_print(struct polygon* o) {
 }
 
 bool polygons_collide(struct polygon* o1, struct polygon* o2) {
-  bool collides = true;
   for(unsigned axis = 0; axis < polygon_nPoints(o1); axis++) {
     struct matrix normal = polygon_vertix_normal(o1, axis);
     struct matrix normal_t = matrix_transpose(&normal);
     // 1. Compute projections for o1
     struct matrix projections1 = matrix_multiply(&normal_t, &o1->points);
-    struct matrix min1 = matrix_rowwise_min(&projections1);
-    struct matrix max1 = matrix_rowwise_max(&projections1);
+    double min1 = matrix_min(&projections1);
+    double max1 = matrix_max(&projections1);
     // 2. Compute projections for o2
     struct matrix projections2 = matrix_multiply(&normal_t, &o2->points);
-    struct matrix min2 = matrix_rowwise_min(&projections2);
-    struct matrix max2 = matrix_rowwise_max(&projections2);
+    double min2 = matrix_min(&projections2);
+    double max2 = matrix_max(&projections2);
     // 3. Check if there is overlap
-    bool overlaps = matrix_value(&min1, 0, 0);
+    bool overlaps = fmax(min1, min2) < fmin(max1, max2);
+    if(!overlaps) {
+      return false;
+    }
   }
   return true;
 }

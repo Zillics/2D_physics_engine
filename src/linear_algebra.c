@@ -79,11 +79,21 @@ struct matrix translation_matrix_2D(double x, double y) {
 struct matrix matrix_transpose(struct matrix* A) {
   struct matrix* At = matrix_new(A->cols, A->rows, 0.0);
   for(unsigned i = 0; i < A->rows; i++) {
-    for(unsigned j = 0; j < A->cols; i++) {
+    for(unsigned j = 0; j < A->cols; j++) {
       *matrix_element(At, j, i) = matrix_value(A, i, j);
     }
   }
   return *At;
+}
+
+struct matrix matrix_negative(struct matrix* A) {
+  struct matrix* ret = matrix_new(A->rows, A->cols, 0.0);
+  for(unsigned i = 0; i < A->rows; i++) {
+    for(unsigned j = 0; j < A->cols; j++) {
+      *matrix_element(ret, i, j) = -matrix_value(A, i, j);
+    }
+  }
+  return *ret;
 }
 
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
@@ -92,7 +102,7 @@ struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
   for(unsigned i = 0; i < A->rows; i++) {
     for(unsigned j = 0; j < B->cols; j++) {
       double val = 0.0; 
-      for(unsigned k = 0; k < A->rows; k++) {
+      for(unsigned k = 0; k < A->cols; k++) {
         val += matrix_value(A, i, k) * matrix_value(B, k, j);
       }
       *matrix_element(ret, i, j) = val;

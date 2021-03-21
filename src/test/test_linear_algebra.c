@@ -28,6 +28,23 @@
     ck_assert_double_eq(matrix_value(A, 2, 0), matrix_value(&B, 2, 0));
     ck_assert_double_eq(matrix_value(A, 2, 1), matrix_value(&B, 2, 1));
     ck_assert_double_eq(matrix_value(A, 2, 2), matrix_value(&B, 2, 2));
+
+    struct matrix* C = matrix_new(2, 6, 1.0);
+    struct matrix D = matrix_transpose(C);
+    struct matrix CD = matrix_multiply(C, &D);
+    ck_assert_int_eq(CD.rows, 2);
+    ck_assert_int_eq(CD.cols, 2);
+    struct matrix* v = matrix_new(1, 6, 1.0);
+    struct matrix* X = matrix_new(6, 8, 1.0);
+    struct matrix vX = matrix_multiply(v, X);
+    ck_assert_int_eq(vX.rows, 1);
+    ck_assert_int_eq(vX.cols, 8);
+
+    struct matrix vt = matrix_transpose(v);
+    struct matrix Xt = matrix_transpose(X);
+    struct matrix Xtvt = matrix_multiply(&Xt, &vt);
+    ck_assert_int_eq(Xtvt.rows, 8);
+    ck_assert_int_eq(Xtvt.cols, 1);
   }
   END_TEST
 
@@ -69,6 +86,23 @@
   }
   END_TEST
 
+  START_TEST (test_matrix_transpose) {
+    struct matrix* v = matrix_new(5, 1, 0.0);
+    *matrix_element(v, 0, 0) = 1.0;
+    *matrix_element(v, 1, 0) = 2.0;
+    *matrix_element(v, 2, 0) = 3.0;
+    *matrix_element(v, 3, 0) = 4.0;
+    *matrix_element(v, 4, 0) = 5.0;
+    struct matrix vt = matrix_transpose(v);
+    ck_assert_int_eq(v->rows, vt.cols);
+    ck_assert_int_eq(v->cols, vt.rows);
+    ck_assert_double_eq(matrix_value(v, 0, 0), matrix_value(&vt, 0, 0));
+    ck_assert_double_eq(matrix_value(v, 1, 0), matrix_value(&vt, 0, 1));
+    ck_assert_double_eq(matrix_value(v, 2, 0), matrix_value(&vt, 0, 2));
+    ck_assert_double_eq(matrix_value(v, 3, 0), matrix_value(&vt, 0, 3));
+    ck_assert_double_eq(matrix_value(v, 4, 0), matrix_value(&vt, 0, 4));
+  }
+  END_TEST
 Suite* matrix_suite(void)
 {
     Suite *s;
@@ -81,6 +115,7 @@ Suite* matrix_suite(void)
 
     tcase_add_test(tc_core, test_matrix_multiplication);
     tcase_add_test(tc_core, test_matrix_min_max);
+    tcase_add_test(tc_core, test_matrix_transpose);
     suite_add_tcase(s, tc_core);
 
     return s;

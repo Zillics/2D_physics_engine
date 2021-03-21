@@ -31,6 +31,8 @@ void matrix_rotate_rad(struct matrix* A, double rad);
 
 struct matrix matrix_transpose(struct matrix* A);
 
+struct matrix matrix_negative(struct matrix* A);
+
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 
 
 struct matrix matrices_multiply(unsigned N, struct matrix matrices[N]); 

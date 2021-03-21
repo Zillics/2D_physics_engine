@@ -24,12 +24,13 @@ struct matrix polygon_vertix_normal(struct polygon* o, unsigned i);
 void polygon_centroid(struct polygon* o, double* x, double*y);
 bool polygon_contains(struct polygon* o, double* p);
 void polygon_rotate(struct polygon* o, double deg);
-void polygon_translate(struct polygon* o, double* v);
+void polygon_translate(struct polygon* o, double* v, double k);
 void polygon_rotate_rad(struct polygon* o, double rad);
 void polygon_rotate_deg(struct polygon* o, double deg);
 void polygon_print(struct polygon* o);
 
-bool polygons_collide(struct polygon* o1, struct polygon* o2);
+bool polygons_collide_(struct polygon* o1, struct polygon* o2);
 
+bool polygons_collide(unsigned N, struct polygon polygons[N]);
 
 #endif

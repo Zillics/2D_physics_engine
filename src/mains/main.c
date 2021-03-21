@@ -40,10 +40,10 @@ int main(int argc, char* argv[])
 
                 // Display all rendered stuff
                 SDL_RenderPresent(renderer);
-                if(polygons_collide(oc->polygons + 0, oc->polygons + 1)) {
-                  oc->polygons[0].color = default_color;
-                } else {
+                if(polygons_collide(2, oc->polygons)) {
                   oc->polygons[0].color = collision_color;
+                } else {
+                  oc->polygons[0].color = default_color;
                 }
                 while (SDL_PollEvent(&event)) {
                     switch(event.type) {
@@ -64,14 +64,14 @@ int main(int argc, char* argv[])
                             matrix_rotate(direction, -ROT_INCR);
                             break;
                           case SDL_SCANCODE_S:
-                            polygon_translate(player, direction->data);
+                            polygon_translate(player, direction->data, -1.0);
                             break;
                           case SDL_SCANCODE_D:
                             polygon_rotate(player, ROT_INCR);
                             matrix_rotate(direction, ROT_INCR);
                             break;
                           case SDL_SCANCODE_W:
-                            polygon_translate(player, direction->data);
+                            polygon_translate(player, direction->data, 1.0);
                             break;
                           default:
                             break;

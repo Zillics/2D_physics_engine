@@ -52,4 +52,8 @@ struct matrix matrix_colwise_max(struct matrix* A);
 double matrix_min(struct matrix* A);
 double matrix_max(struct matrix* A);
 
+double matrix_norm_L2(struct matrix* A);
+
+double vector_norm_L2(double* v, unsigned N);
+
 #endif

@@ -220,3 +220,18 @@ double matrix_max(struct matrix* A) {
   return max;
 }
 
+double matrix_norm_L2(struct matrix* A) {
+  double ss = 0.0;
+  for(unsigned i = 0; i < A->cols; i++) {
+    ss += vector_norm_L2(matrix_col(A, i), A->rows);
+  }
+  return ss;
+}
+
+double vector_norm_L2(double* v, unsigned N) {
+  double ss = 0.0;
+  for(unsigned i = 0; i < N; i++) {
+    ss += pow(*(v + i), 2);
+  }
+  return sqrt(ss);
+}

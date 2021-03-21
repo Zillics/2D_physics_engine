@@ -1,37 +1,35 @@
-#include "polygon_container.h"
+#include "object_container.h"
 
-
-struct polygon_container* new_polygon_container() {
-  struct polygon_container* oc = malloc(sizeof(struct polygon_container));
-  oc->polygons = NULL;
+struct object_container* object_container_new() {
+  struct object_container* oc = malloc(sizeof(struct object_container));
+  oc->objects = NULL;
   oc->nObjects = 0;
-  oc->mem_polygons = 0;
+  oc->mem_objects = 0;
   return oc;
 }
 
-void delete_polygon_container(struct polygon_container* oc) {
+void object_container_delete(struct object_container* oc) {
   for(unsigned i = 0; i < oc->nObjects; i++) {
-    polygon_delete(oc->polygons + i);
+    object_delete(oc->objects + i);
   }
   free(oc);
 }
 
-void insert_square(struct polygon_container* oc, unsigned x, unsigned y, unsigned width, struct color color) {
-  struct polygon* o = new_square(x, y, width, color);
-  size_t size = polygon_size(o);
-  oc->polygons = realloc(oc->polygons, oc->mem_polygons + size);
-  oc->polygons[oc->nObjects] = *o;
-  oc->mem_polygons += size;
+void insert_square(struct object_container* oc, unsigned x, unsigned y, unsigned width, struct color color, double mass) {
+  struct object* o = new_square_object(x, y, width, color, mass);
+  size_t size = object_size(o);
+  oc->objects = realloc(oc->objects, oc->mem_objects + size);
+  oc->objects[oc->nObjects] = *o;
+  oc->mem_objects += size;
   oc->nObjects += 1;
 }
 
-void pop_polygon(struct polygon_container* oc, unsigned i) {
+void pop_polygon(struct object_container* oc, unsigned i) {
 
 }
 
-
-void render_polygons(struct polygon_container* oc, SDL_Renderer* renderer) {
+void render_objects(struct object_container* oc, SDL_Renderer* renderer) {
   for(unsigned int i = 0; i < oc->nObjects; i++) {
-    polygon_render(oc->polygons + i, renderer);
+    object_render(oc->objects + i, renderer);
   }
 }

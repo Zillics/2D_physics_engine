@@ -1,17 +1,18 @@
 #ifndef OBJECT_CONTAINER_H
 #define OBJECT_CONTAINER_H
-#include "polygon.h"
+#include "object.h"
+#include <SDL2/SDL.h>
 
-struct polygon_container {
-  struct polygon* polygons;
+struct object_container {
+  struct object* objects;
   unsigned nObjects;
-  size_t mem_polygons;
+  size_t mem_objects;
 };
 
-struct polygon_container* new_polygon_container();
-void delete_polygon_container(struct polygon_container* oc);
-void insert_square(struct polygon_container* oc, unsigned x, unsigned y, unsigned width, struct color color);
-void pop_polygon(struct polygon_container* oc, unsigned i);
-void render_polygons(struct polygon_container* oc, SDL_Renderer* renderer);
+struct object_container* object_container_new();
+void object_container_delete(struct object_container* oc);
+void insert_square(struct object_container* oc, unsigned x, unsigned y, unsigned width, struct color color, double mass);
+void object_container_pop(struct object_container* oc, unsigned i);
+void render_objects(struct object_container* oc, SDL_Renderer* renderer);
 
 #endif

@@ -1,6 +1,6 @@
 #include <SDL2/SDL.h>
 #include "../polygon.h"
-#include "../polygon_container.h"
+#include "../object_container.h"
 #include "../linear_algebra.h"
 
 #define FPS 30
@@ -13,7 +13,7 @@ struct color collision_color = RED;
 
 int main(int argc, char* argv[])
 {
-  struct polygon_container* oc = new_polygon_container();
+  struct object_container* oc = new_object_container();
   insert_square(oc, 200, 200, 30, default_color);
   insert_square(oc, 400, 100, 30, default_color);
   struct polygon* player = oc->polygons + 0;
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
         if (window) {
             SDL_DestroyWindow(window);
         }
-        delete_polygon_container(oc);
+        delete_object_container(oc);
     }
     SDL_Quit();
     return 0;

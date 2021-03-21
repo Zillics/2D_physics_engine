@@ -29,6 +29,8 @@ void matrix_rotate_deg(struct matrix* A, double rad);
 
 void matrix_rotate_rad(struct matrix* A, double rad);
 
+struct matrix matrix_transpose(struct matrix* A);
+
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 
 
 struct matrix matrices_multiply(unsigned N, struct matrix matrices[N]); 
@@ -38,5 +40,14 @@ struct matrix identity_matrix(unsigned dim);
 struct matrix rotation_matrix_2D(double rad);
 
 struct matrix translation_matrix_2D(double x, double y);
+
+struct matrix matrix_rowwise_min(struct matrix* A);
+struct matrix matrix_rowwise_max(struct matrix* A);
+
+struct matrix matrix_colwise_min(struct matrix* A);
+struct matrix matrix_colwise_max(struct matrix* A);
+
+double matrix_min(struct matrix* A);
+double matrix_max(struct matrix* A);
 
 #endif

@@ -3,8 +3,7 @@
 #include <check.h>
 #include "../linear_algebra.h"
 
-  START_TEST (test_matrix_multiplication)
-  {
+  START_TEST (test_matrix_multiplication) {
     struct matrix* A = matrix_new(3, 3, 0.0);
     *matrix_element(A, 0, 0) = 1.0;
     *matrix_element(A, 0, 1) = 2.0;
@@ -32,6 +31,44 @@
   }
   END_TEST
 
+  START_TEST (test_matrix_min_max) {
+    struct matrix* A = matrix_new(3, 5, 0.0);
+    *matrix_element(A, 0, 0) = 500.0;
+    *matrix_element(A, 0, 1) = 1000.0;
+    *matrix_element(A, 0, 2) = 93.0;
+    *matrix_element(A, 0, 3) = -123.0; // <-----------
+    *matrix_element(A, 0, 4) = 0.0;
+
+    *matrix_element(A, 1, 0) = 0.0; // <---------
+    *matrix_element(A, 1, 1) = 1.0;
+    *matrix_element(A, 1, 2) = 2.0;
+    *matrix_element(A, 1, 3) = 3.0;
+    *matrix_element(A, 1, 4) = 4.0;
+
+    *matrix_element(A, 2, 0) = 1.0; 
+    *matrix_element(A, 2, 1) = 2.0;
+    *matrix_element(A, 2, 2) = -0.5; // <---------
+    *matrix_element(A, 2, 3) = 0.0;
+    *matrix_element(A, 2, 4) = 3.0;
+
+    struct matrix min = matrix_rowwise_min(A);
+    struct matrix max = matrix_rowwise_max(A);
+    ck_assert_double_eq(matrix_value(&min, 0, 0), -123.0);
+    ck_assert_double_eq(matrix_value(&min, 1, 0), 0.0);
+    ck_assert_double_eq(matrix_value(&min, 2, 0), -0.5);
+
+    ck_assert_double_eq(matrix_value(&max, 0, 0), 1000.0);
+    ck_assert_double_eq(matrix_value(&max, 1, 0), 4.0);
+    ck_assert_double_eq(matrix_value(&max, 2, 0), 3.0);
+
+    double min_val = matrix_min(A);
+    double max_val = matrix_max(A);
+
+    ck_assert_double_eq(min_val, -123.0);
+    ck_assert_double_eq(max_val, 1000.0);
+  }
+  END_TEST
+
 Suite* matrix_suite(void)
 {
     Suite *s;
@@ -43,6 +80,7 @@ Suite* matrix_suite(void)
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, test_matrix_multiplication);
+    tcase_add_test(tc_core, test_matrix_min_max);
     suite_add_tcase(s, tc_core);
 
     return s;

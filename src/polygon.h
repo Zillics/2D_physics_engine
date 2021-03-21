@@ -19,14 +19,17 @@ void polygon_delete(struct polygon* o);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);
 unsigned polygon_nPoints(struct polygon* o);
 double* polygon_point(struct polygon* o, unsigned i);
+/** Find normal vector of vertix between point i and point i + 1. */
+struct matrix polygon_vertix_normal(struct polygon* o, unsigned i);
 void polygon_centroid(struct polygon* o, double* x, double*y);
 bool polygon_contains(struct polygon* o, double* p);
 void polygon_rotate(struct polygon* o, double deg);
 void polygon_translate(struct polygon* o, double* v);
 void polygon_rotate_rad(struct polygon* o, double rad);
 void polygon_rotate_deg(struct polygon* o, double deg);
-
 void polygon_print(struct polygon* o);
+
+bool polygons_collide(struct polygon* o1, struct polygon* o2);
 
 
 #endif

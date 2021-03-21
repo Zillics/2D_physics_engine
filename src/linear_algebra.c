@@ -76,6 +76,16 @@ struct matrix translation_matrix_2D(double x, double y) {
   return I;
 }
 
+struct matrix matrix_transpose(struct matrix* A) {
+  struct matrix* At = matrix_new(A->cols, A->rows, 0.0);
+  for(unsigned i = 0; i < A->rows; i++) {
+    for(unsigned j = 0; j < A->cols; i++) {
+      *matrix_element(At, j, i) = matrix_value(A, i, j);
+    }
+  }
+  return *At;
+}
+
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
   assert(A->cols == B->rows);
   struct matrix* ret = matrix_new(A->rows, B->cols, 0);
@@ -114,5 +124,89 @@ void matrix_print(struct matrix* A) {
     }
     printf("\n");
   }
+}
+
+struct matrix matrix_rowwise_min(struct matrix* A) {
+  struct matrix* ret = matrix_new(A->rows, 1, 0.0);
+  double val;
+  for(unsigned i = 0; i < A->rows; i++) {
+    double min = matrix_value(A, i, 0);
+    for(unsigned j = 1; j < A->cols; j++) {
+      val = matrix_value(A, i, j);
+      if(val < min) {
+        min = val;
+      }
+    }
+      *matrix_element(ret, i, 0) = min;
+  }
+  return *ret;
+}
+
+struct matrix matrix_rowwise_max(struct matrix* A) {
+  struct matrix* ret = matrix_new(A->rows, 1, 0.0);
+  double val;
+  for(unsigned i = 0; i < A->rows; i++) {
+    double min = matrix_value(A, i, 0);
+    for(unsigned j = 1; j < A->cols; j++) {
+      val = matrix_value(A, i, j);
+      if(val > min) {
+        min = val;
+      }
+    }
+      *matrix_element(ret, i, 0) = min;
+  }
+  return *ret;
+}
+
+struct matrix matrix_colwise_min(struct matrix* A) {
+  struct matrix* ret = matrix_new(A->cols, 1, 0.0);
+  double val;
+  for(unsigned j = 0; j < A->cols; j++) {
+    double min = matrix_value(A, 0, j);
+    for(unsigned i = 1; i < A->cols; i++) {
+      val = matrix_value(A, i, j);
+      if(val < min) {
+        min = val;
+      }
+    }
+      *matrix_element(ret, j, 0) = min;
+  }
+  return *ret;
+}
+
+struct matrix matrix_colwise_max(struct matrix* A) {
+  struct matrix* ret = matrix_new(A->cols, 1, 0.0);
+  double val;
+  for(unsigned j = 0; j < A->cols; j++) {
+    double min = matrix_value(A, 0, j);
+    for(unsigned i = 1; i < A->cols; i++) {
+      val = matrix_value(A, i, j);
+      if(val > min) {
+        min = val;
+      }
+    }
+      *matrix_element(ret, j, 0) = min;
+  }
+  return *ret;
+}
+
+double matrix_min(struct matrix* A) {
+  double min = A->data[0];
+  for(unsigned k = 1; k < A->cols * A->rows; k++) {
+    if(A->data[k] < min) {
+      min = A->data[k];
+    }
+  }
+  return min;
+}
+
+double matrix_max(struct matrix* A) {
+  double max = A->data[0];
+  for(unsigned k = 1; k < A->cols * A->rows; k++) {
+    if(A->data[k] > max) {
+      max = A->data[k];
+    }
+  }
+  return max;
 }
 

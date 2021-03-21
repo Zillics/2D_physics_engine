@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include "winding_number_algorithm.h"
 
-#define PI 3.141592654
-
 struct polygon* new_square(int x, int y, unsigned width, struct color color) {
   double points[4][2] = { {x - 0.5 * width, y + 0.5 * width},
                           {x + 0.5 * width, y + 0.5 * width},
@@ -39,6 +37,15 @@ double* polygon_point(struct polygon* o, unsigned i) {
   return o->points.data + i * o->points.rows;
 }
 
+struct matrix polygon_vertix_normal(struct polygon* o, unsigned i) {
+  struct matrix* n = matrix_new(3, 1, 0.0);
+  // Swap x and y axes to get normal
+  *matrix_element(n, 0, 0) = polygon_point(o, i + 1)[1] - polygon_point(o, i)[1];
+  *matrix_element(n, 1, 0) = polygon_point(o, i + 1)[0] - polygon_point(o, i)[0];
+  *matrix_element(n, 2, 0) = 1.0;
+  return *n;
+}
+
 void polygon_centroid(struct polygon* o, double* x, double* y) {
   *x = 0.0;
   *y = 0.0;
@@ -60,7 +67,7 @@ void polygon_rotate(struct polygon* o, double deg) {
 }
 
 void polygon_rotate_deg(struct polygon* o, double deg) {
-  double rad = (deg / 360) * 2 * PI;
+  double rad = (deg / 360) * 2 * M_PI;
   polygon_rotate_rad(o, rad);
 }
 
@@ -101,4 +108,21 @@ void polygon_print(struct polygon* o) {
   }
 }
 
-
+bool polygons_collide(struct polygon* o1, struct polygon* o2) {
+  bool collides = true;
+  for(unsigned axis = 0; axis < polygon_nPoints(o1); axis++) {
+    struct matrix normal = polygon_vertix_normal(o1, axis);
+    struct matrix normal_t = matrix_transpose(&normal);
+    // 1. Compute projections for o1
+    struct matrix projections1 = matrix_multiply(&normal_t, &o1->points);
+    struct matrix min1 = matrix_rowwise_min(&projections1);
+    struct matrix max1 = matrix_rowwise_max(&projections1);
+    // 2. Compute projections for o2
+    struct matrix projections2 = matrix_multiply(&normal_t, &o2->points);
+    struct matrix min2 = matrix_rowwise_min(&projections2);
+    struct matrix max2 = matrix_rowwise_max(&projections2);
+    // 3. Check if there is overlap
+    bool overlaps = matrix_value(&min1, 0, 0);
+  }
+  return true;
+}

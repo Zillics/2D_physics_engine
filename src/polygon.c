@@ -8,13 +8,14 @@ struct polygon* new_square(int x, int y, unsigned width, struct color color) {
                           {x + 0.5 * width, y + 0.5 * width},
                           {x + 0.5 * width, y - 0.5 * width},
                           {x - 0.5 * width, y - 0.5 * width} };
-  struct polygon* ret = new_polygon(4, vertices, color);
+  struct polygon* ret = polygon_new(4, vertices, color);
   double xMid, yMid;
   polygon_centroid(ret, &xMid, &yMid);
   return ret;
 }
 
-struct polygon* new_polygon(unsigned nVertices, double vertices[nVertices][2], struct color color) {
+struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], struct color color) {
+  printf("AAAAAAAAAA\n");
   struct polygon* o = malloc(sizeof(struct polygon));
   o->vertices = *matrix_new(3, nVertices, 0.0);
   for(unsigned i = 0; i < nVertices; i++) {
@@ -29,8 +30,8 @@ struct polygon* new_polygon(unsigned nVertices, double vertices[nVertices][2], s
   struct matrix m;
   for(unsigned i = 0; i < nVertices; i++) {
     m = polygon_compute_edge_midpoint(o, i);
-    *matrix_element(&o->edge_midpoints, 0, i) = matrix_value(&m, 0, i);
-    *matrix_element(&o->edge_midpoints, 1, i) = matrix_value(&m, 1, i);
+    *matrix_element(&o->edge_midpoints, 0, i) = matrix_value(&m, 0, 0);
+    *matrix_element(&o->edge_midpoints, 1, i) = matrix_value(&m, 1, 0);
     *matrix_element(&o->edge_midpoints, 2, i) = 1.0;
   }
   o->color = color;
@@ -93,8 +94,8 @@ void polygon_recompute_edge_normals(struct polygon* o, bool inward) {
   struct matrix n;
   for(unsigned i = 0; i < N; i++) {
     n = polygon_compute_edge_normal(o, i, inward);
-    *matrix_element(&o->edge_normals, 0, i) = matrix_value(&n, 0, i);
-    *matrix_element(&o->edge_normals, 1, i) = matrix_value(&n, 1, i);
+    *matrix_element(&o->edge_normals, 0, i) = matrix_value(&n, 0, 0);
+    *matrix_element(&o->edge_normals, 1, i) = matrix_value(&n, 1, 0);
     *matrix_element(&o->edge_normals, 2, i) = 1.0;
   }
 }

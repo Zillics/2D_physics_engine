@@ -15,7 +15,7 @@ struct polygon {
 };
 
 struct polygon* new_square(int x, int y, unsigned width, struct color color);
-struct polygon* new_polygon(unsigned nVertices, double vertices[2][nVertices], struct color color);
+struct polygon* polygon_new(unsigned nVertices, double vertices[2][nVertices], struct color color);
 size_t polygon_size(struct polygon* o);
 void polygon_delete(struct polygon* o);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);

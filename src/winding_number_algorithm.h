@@ -41,13 +41,13 @@ int wn_PnPoly( double* P, struct matrix V, int n )
       i2 = (i + 1) % V.cols;
         if (matrix_value(&V, 1, i1) <= P[1]) {          // start y <= P.y
             if (matrix_value(&V, 1, i2)  > P[1]) {      // an upward crossing
-                 if (isLeft( matrix_col(&V, i1), matrix_col(&V, i2), P) > 0) {  // P left of  edge
+                 if (isLeft( matrix_col_raw(&V, i1), matrix_col_raw(&V, i2), P) > 0) {  // P left of  edge
                      ++wn;            // have  a valid up intersect
                   }
             }
         } else {                        // start y > P.y (no test needed)
             if (matrix_value(&V, 1, i2)  <= P[1]) {    // a downward crossing
-                 if (isLeft( matrix_col(&V, i1), matrix_col(&V, i2), P) < 0) { // P right of  edge
+                 if (isLeft( matrix_col_raw(&V, i1), matrix_col_raw(&V, i2), P) < 0) { // P right of  edge
                      --wn;            // have  a valid down intersect
                   }
             }

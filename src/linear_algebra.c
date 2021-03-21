@@ -30,8 +30,16 @@ double matrix_value(struct matrix* A, unsigned row, unsigned col) {
   return *(matrix_element(A, row, col));
 }
 
+struct matrix matrix_col(struct matrix* A, unsigned j) {
+  assert(j < A->cols);
+  struct matrix* col = matrix_new(A->rows, 1, 0.0);
+  for(unsigned i = 0; i < A->rows; i++) {
+    *matrix_element(col, i, j) = matrix_value(A, i, j);
+  }
+  return *col;
+}
 
-double* matrix_col(struct matrix* A, unsigned i) {
+double* matrix_col_raw(struct matrix* A, unsigned i) {
   assert(i < A->cols);
   return A->data + i * A->rows;
 }
@@ -233,7 +241,7 @@ double matrix_max(struct matrix* A) {
 double matrix_norm_L2(struct matrix* A) {
   double ss = 0.0;
   for(unsigned i = 0; i < A->cols; i++) {
-    ss += vector_norm_L2(matrix_col(A, i), A->rows);
+    ss += vector_norm_L2(matrix_col_raw(A, i), A->rows);
   }
   return ss;
 }

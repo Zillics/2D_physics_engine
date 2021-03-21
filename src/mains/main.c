@@ -14,12 +14,7 @@ struct color collision_color = RED;
 int main(int argc, char* argv[])
 {
   struct polygon* poly = new_square(200, 200, 30, default_color);
-  struct matrix normals[4];
-  struct matrix midpoints[4];
-  for(unsigned i = 0; i < 4; i++) {
-    normals[i] = polygon_edge_normal(poly, i, false);
-    midpoints[i] = polygon_edge_midpoint(poly, i);
-  }
+
     if (SDL_Init(SDL_INIT_VIDEO) == 0) {
         SDL_Window* window = NULL;
         SDL_Renderer* renderer = NULL;
@@ -35,11 +30,6 @@ int main(int argc, char* argv[])
                 SDL_RenderClear(renderer);
 
                 polygon_render(poly, renderer);
-                for(unsigned i = 0; i < 4; i++) {
-                  struct matrix* n = normals + i;
-                  struct matrix* m = midpoints + i;
-                  SDL_RenderDrawLine(renderer, matrix_value(m, 0, 0), matrix_value(m, 1, 0), matrix_value(m, 0, 0) + matrix_value(n, 0, 0), matrix_value(m, 1, 0) + matrix_value(n, 1, 0));
-                }
                 // Display all rendered stuff
                 SDL_RenderPresent(renderer);
                 while (SDL_PollEvent(&event)) {

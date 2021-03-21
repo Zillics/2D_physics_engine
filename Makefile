@@ -8,6 +8,8 @@ SRC_DIRS := ./src
 SRCS := $(shell find $(SRC_DIRS) -maxdepth 1 -name *.c)
 EXEC_SRCS := $(shell find $(SRC_DIRS)/mains/ -maxdepth 1 -name *.c)
 EXECUTABLES := $(patsubst $(SRC_DIRS)/mains/%.c, $(EXEC_DIR)/%, $(EXEC_SRCS))
+TEST_SRCS := $(shell find $(SRC_DIRS)/test/ -maxdepth 1 -name test_*.c)
+TEST_EXECS := $(patsubst $(SRC_DIRS)/test/test_%.c, $(BUILD_DIR)/src/test/test_%, $(TEST_SRCS))
 
 # String substitution for every C/C++ file.
 # As an example, hello.cpp turns into ./build/hello.cpp.o
@@ -26,15 +28,20 @@ CFLAGS := $(shell sdl2-config --cflags)
 
 LDFLAGS := $(shell sdl2-config --libs) -lm -lcheck
 
+.PHONY: all
 all: $(EXECUTABLES)
 
-# The final build step.
+.PHONY: test
+test: $(TEST_EXECS)
+
 $(EXEC_DIR)/%: $(OBJS) $(BUILD_DIR)/src/mains/%.c.o
-	mkdir -p $(dir $@)
 	mkdir -p $(EXEC_DIR)
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-# Build step for C sources
+$(BUILD_DIR)/src/test/%: $(OBJS) $(BUILD_DIR)/src/test/%.c.o
+	$(CC) $^ -o $@ $(LDFLAGS)
+	$@
+
 $(BUILD_DIR)/%.c.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@

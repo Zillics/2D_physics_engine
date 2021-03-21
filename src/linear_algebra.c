@@ -111,6 +111,16 @@ struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
   return *ret;
 }
 
+struct matrix matrix_multiply_scalar(struct matrix* A, double k) {
+  struct matrix* ret = matrix_new(A->rows, A->cols, 0.0);
+  for(unsigned i = 0; i < A->rows; i++) {
+    for(unsigned j = 0; j < A->cols; j++) {
+      *matrix_element(ret, i, j) = matrix_value(A, i, j) * k;
+    }
+  }
+  return *ret;
+}
+
 struct matrix matrices_multiply(unsigned N, struct matrix matrices[N]) {
   assert(N > 1);
   struct matrix ret = matrices[0];
@@ -234,4 +244,22 @@ double vector_norm_L2(double* v, unsigned N) {
     ss += pow(*(v + i), 2);
   }
   return sqrt(ss);
+}
+
+double vector_angle(struct matrix* v1, struct matrix* v2) {
+  assert(v1->rows == 1 || v1->cols == 1);
+  assert(v2->rows == 1 || v2->cols == 1);
+  double v1norm = vector_norm_L2(v1->data, 2);
+  double v2norm = vector_norm_L2(v2->data, 2);
+  struct matrix v1v2 = matrix_multiply(v1, v2);
+  double angle = acos(matrix_value(&v1v2, 0, 0) / (v1norm * v2norm));
+  return angle;
+}
+
+struct matrix unit_vector(struct matrix* v) {
+  assert(v->rows == 1 || v->cols ==1);
+  matrix_print(v);
+  unsigned N = v->rows * v->cols;
+  double norm = vector_norm_L2(v->data, N);
+  return matrix_multiply_scalar(v, 1.0/norm);
 }

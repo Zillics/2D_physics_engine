@@ -37,14 +37,33 @@ double* polygon_point(struct polygon* o, unsigned i) {
   return o->points.data + i * o->points.rows;
 }
 
-struct matrix polygon_vertix_normal(struct polygon* o, unsigned i) {
+struct matrix polygon_edge_normal(struct polygon* o, unsigned i, bool inward) {
+  int dir;
+  if(inward) {
+    dir = -1;
+  } else {
+    dir = 1;
+  }
   struct matrix* n = matrix_new(3, 1, 0.0);
   // Swap x and y axes to get normal
   unsigned i2 = (i + 1) % polygon_nPoints(o);
-  *matrix_element(n, 0, 0) = polygon_point(o, i2)[1] - polygon_point(o, i)[1];
-  *matrix_element(n, 1, 0) = polygon_point(o, i2)[0] - polygon_point(o, i)[0];
-  *matrix_element(n, 2, 0) = 1.0;
-  return *n;
+  *matrix_element(n, 0, 0) = polygon_point(o, i2)[0] - polygon_point(o, i)[0];
+  *matrix_element(n, 1, 0) = polygon_point(o, i2)[1] - polygon_point(o, i)[1];
+  matrix_rotate(n, dir * 90);
+  struct matrix ret = unit_vector(n);
+  *matrix_element(&ret, 2, 0) = 1.0;
+  return ret;
+}
+
+struct matrix polygon_edge_midpoint(struct polygon* o, unsigned i) {
+  struct matrix* m = matrix_new(3, 1, 0.0);
+  unsigned i2 = (i + 1) % polygon_nPoints(o);
+  double* p1 = polygon_point(o, i);
+  double* p2 = polygon_point(o, i2);
+  *matrix_element(m, 0, 0) = 0.5 * (p1[0] + p2[0]);
+  *matrix_element(m, 1, 0) = 0.5 * (p1[1] + p2[1]);
+  *matrix_element(m, 2, 0) = 1.0;
+  return *m;
 }
 
 void polygon_centroid(struct polygon* o, double* x, double* y) {
@@ -109,34 +128,13 @@ void polygon_print(struct polygon* o) {
   }
 }
 
-bool polygons_collide_(struct polygon* o1, struct polygon* o2) {
-  for(unsigned axis = 0; axis < polygon_nPoints(o1); axis++) {
-    struct matrix normal = polygon_vertix_normal(o1, axis);
-    struct matrix normal_t = matrix_transpose(&normal);
-    // 1. Compute projections for o1
-    struct matrix projections1 = matrix_multiply(&normal_t, &o1->points);
-    double min1 = matrix_min(&projections1);
-    double max1 = matrix_max(&projections1);
-    struct matrix projections2 = matrix_multiply(&normal_t, &o2->points);
-    double min2 = matrix_min(&projections2);
-    double max2 = matrix_max(&projections2);
-    // 3. Check if there is overlap
-    bool overlaps = fmax(min1, min2) < fmin(max1, max2);
-    if(!overlaps) {
-      return false;
-    }
-  }
-  return true;
-}
-
-
 bool polygons_collide(unsigned N, struct polygon polygons[N]) {
   for(unsigned i = 0; i < N; i++) {
     struct polygon* o1 = polygons + i;
     struct polygon* o2 = polygons + (i + 1) % N;
     for(unsigned axis = 0; axis < polygon_nPoints(o1); axis++) {
       // 1. Compute normal of current vertix
-      struct matrix normal = polygon_vertix_normal(o1, axis);
+      struct matrix normal = polygon_edge_normal(o1, axis, true);
       // 2. Compute projections of o1 and o2 points on normal
       struct matrix points1 = matrix_transpose(&o1->points);
       struct matrix points2 = matrix_transpose(&o2->points);

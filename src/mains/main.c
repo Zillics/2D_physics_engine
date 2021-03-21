@@ -13,14 +13,13 @@ struct color collision_color = RED;
 
 int main(int argc, char* argv[])
 {
-  struct object_container* oc = new_object_container();
-  insert_square(oc, 200, 200, 30, default_color);
-  insert_square(oc, 400, 100, 30, default_color);
-  struct polygon* player = oc->polygons + 0;
-  struct matrix* direction = matrix_new(3, 1, 0.0);
-  *matrix_element(direction, 0, 0) = 1.0;
-  *matrix_element(direction, 1, 0) = 0.0;
-  *matrix_element(direction, 2, 0) = 1.0;
+  struct polygon* poly = new_square(200, 200, 30, default_color);
+  struct matrix normals[4];
+  struct matrix midpoints[4];
+  for(unsigned i = 0; i < 4; i++) {
+    normals[i] = polygon_edge_normal(poly, i, false);
+    midpoints[i] = polygon_edge_midpoint(poly, i);
+  }
     if (SDL_Init(SDL_INIT_VIDEO) == 0) {
         SDL_Window* window = NULL;
         SDL_Renderer* renderer = NULL;
@@ -35,16 +34,14 @@ int main(int argc, char* argv[])
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
                 SDL_RenderClear(renderer);
 
-                // Render polygons
-                render_polygons(oc, renderer);
-
+                polygon_render(poly, renderer);
+                for(unsigned i = 0; i < 4; i++) {
+                  struct matrix* n = normals + i;
+                  struct matrix* m = midpoints + i;
+                  SDL_RenderDrawLine(renderer, matrix_value(m, 0, 0), matrix_value(m, 1, 0), matrix_value(m, 0, 0) + matrix_value(n, 0, 0), matrix_value(m, 1, 0) + matrix_value(n, 1, 0));
+                }
                 // Display all rendered stuff
                 SDL_RenderPresent(renderer);
-                if(polygons_collide(2, oc->polygons)) {
-                  oc->polygons[0].color = collision_color;
-                } else {
-                  oc->polygons[0].color = default_color;
-                }
                 while (SDL_PollEvent(&event)) {
                     switch(event.type) {
                       case SDL_MOUSEBUTTONDOWN:
@@ -60,18 +57,12 @@ int main(int argc, char* argv[])
                       case SDL_KEYDOWN:
                         switch(event.key.keysym.scancode) {
                           case SDL_SCANCODE_A:
-                            polygon_rotate(player, -ROT_INCR);
-                            matrix_rotate(direction, -ROT_INCR);
                             break;
                           case SDL_SCANCODE_S:
-                            polygon_translate(player, direction->data, -1.0);
                             break;
                           case SDL_SCANCODE_D:
-                            polygon_rotate(player, ROT_INCR);
-                            matrix_rotate(direction, ROT_INCR);
                             break;
                           case SDL_SCANCODE_W:
-                            polygon_translate(player, direction->data, 1.0);
                             break;
                           default:
                             break;
@@ -94,7 +85,7 @@ int main(int argc, char* argv[])
         if (window) {
             SDL_DestroyWindow(window);
         }
-        delete_object_container(oc);
+        polygon_delete(poly);
     }
     SDL_Quit();
     return 0;

@@ -40,3 +40,4 @@ void object_init(struct object* o) {
   *matrix_element(&o->angular_acc, 2, 0) = 1.0;  
 }
 
+

@@ -35,6 +35,8 @@ struct matrix matrix_negative(struct matrix* A);
 
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 
 
+struct matrix matrix_multiply_scalar(struct matrix* A, double k); 
+
 struct matrix matrices_multiply(unsigned N, struct matrix matrices[N]); 
 
 struct matrix identity_matrix(unsigned dim);
@@ -55,5 +57,9 @@ double matrix_max(struct matrix* A);
 double matrix_norm_L2(struct matrix* A);
 
 double vector_norm_L2(double* v, unsigned N);
+
+double vector_angle(struct matrix* v1, struct matrix* v2);
+
+struct matrix unit_vector(struct matrix* v);
 
 #endif

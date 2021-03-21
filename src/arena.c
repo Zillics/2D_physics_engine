@@ -13,8 +13,13 @@ struct arena* arena_new(double x_min, double y_min, double x_max, double y_max){
 }
 
 void arena_tick(struct arena* a, double dt) {
+  struct object* o;
+  for(unsigned i = 0; a->objects.nObjects; i++) {
+    o = a->objects.objects + i;
+  }
   a->t += dt;
 }
+
 
 void arena_render(struct arena* a, SDL_Renderer* renderer) {
   for(unsigned i = 0; i < a->objects.nObjects; i++) {

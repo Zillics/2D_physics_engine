@@ -21,7 +21,7 @@ unsigned polygon_nPoints(struct polygon* o);
 double* polygon_point(struct polygon* o, unsigned i);
 /** Find normal vector of vertix between point i and point i + 1. */
 struct matrix polygon_vertix_normal(struct polygon* o, unsigned i);
-void polygon_centroid(struct polygon* o, double* x, double*y);
+void polygon_centroid(struct polygon* o, double* x, double* y);
 bool polygon_contains(struct polygon* o, double* p);
 void polygon_rotate(struct polygon* o, double deg);
 void polygon_translate(struct polygon* o, double* v, double k);

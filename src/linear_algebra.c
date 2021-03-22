@@ -266,7 +266,6 @@ double vector_angle(struct matrix* v1, struct matrix* v2) {
 
 struct matrix unit_vector(struct matrix* v) {
   assert(v->rows == 1 || v->cols ==1);
-  matrix_print(v);
   unsigned N = v->rows * v->cols;
   double norm = vector_norm_L2(v->data, N);
   return matrix_multiply_scalar(v, 1.0/norm);

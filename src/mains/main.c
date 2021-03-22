@@ -30,6 +30,9 @@ int main(int argc, char* argv[])
                 SDL_RenderClear(renderer);
 
                 polygon_render(poly, renderer);
+                double dir[3] = {0.25, -0.2, 1.0};
+                polygon_translate(poly, dir, 1.0);
+                polygon_rotate(poly, 1.0);
                 // Display all rendered stuff
                 SDL_RenderPresent(renderer);
                 while (SDL_PollEvent(&event)) {

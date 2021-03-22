@@ -15,7 +15,6 @@ struct polygon* new_square(int x, int y, unsigned width, struct color color) {
 }
 
 struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], struct color color) {
-  printf("AAAAAAAAAA\n");
   struct polygon* o = malloc(sizeof(struct polygon));
   o->vertices = *matrix_new(3, nVertices, 0.0);
   for(unsigned i = 0; i < nVertices; i++) {
@@ -89,6 +88,7 @@ struct matrix polygon_compute_edge_midpoint(struct polygon* o, unsigned i) {
 }
 
 void polygon_recompute_edge_normals(struct polygon* o, bool inward) {
+  o->edge_normals_inward = inward;
   unsigned N = polygon_nVertices(o);
   o->edge_normals = *matrix_new(3, N, 0.0);
   struct matrix n;
@@ -126,13 +126,16 @@ void polygon_rotate_deg(struct polygon* o, double deg) {
 }
 
 void polygon_rotate_rad(struct polygon* o, double rad) {
+  struct matrix R = rotation_matrix_2D(rad);
   double xMid, yMid;
   polygon_centroid(o, &xMid, &yMid);
   struct matrix transformations[3] = {translation_matrix_2D(xMid, yMid),
-                                      rotation_matrix_2D(rad),
+                                      R,
                                       translation_matrix_2D(-xMid, -yMid)};
   struct matrix TRT = matrices_multiply(3, transformations);
   o->vertices = matrix_multiply(&TRT, &o->vertices);
+  o->edge_normals = matrix_multiply(&R, &o->edge_normals);
+  o->edge_midpoints = matrix_multiply(&TRT, &o->edge_midpoints);
 }
 
 void polygon_translate(struct polygon* o, double* v, double k) {
@@ -141,7 +144,6 @@ void polygon_translate(struct polygon* o, double* v, double k) {
   struct matrix T = translation_matrix_2D(k*v[0], k*v[1]);
   o->vertices = matrix_multiply(&T, &o->vertices);
   o->edge_midpoints = matrix_multiply(&T, &o->edge_midpoints);
-  o->edge_normals = matrix_multiply(&T, &o->edge_normals);
 }
 
 void polygon_render(struct polygon* o, SDL_Renderer* renderer) {

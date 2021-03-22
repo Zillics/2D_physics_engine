@@ -11,6 +11,7 @@ struct polygon {
   struct matrix vertices;
   struct matrix edge_midpoints;
   struct matrix edge_normals;
+  bool edge_normals_inward;
   struct color color;
 };
 

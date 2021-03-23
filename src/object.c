@@ -1,43 +1,73 @@
 #include "object.h"
-  
+
+struct state* state_new() {
+  struct state* s = malloc(sizeof(struct state));
+  s->pos = *matrix_new(3, 1, 0.0);
+  s->vel = *matrix_new(3, 1, 0.0);
+  s->acc = *matrix_new(3, 1, 0.0);
+  s->angular_vel = *matrix_new(3, 1, 0.0);
+  s->angular_acc = *matrix_new(3, 1, 0.0);
+  *matrix_element(&s->pos, 2, 0) = 1.0;
+  *matrix_element(&s->vel, 2, 0) = 1.0;
+  *matrix_element(&s->acc, 2, 0) = 1.0;
+  *matrix_element(&s->angular_vel, 2, 0) = 1.0;
+  *matrix_element(&s->angular_acc, 2, 0) = 1.0;
+  return s;
+}
+
+void state_reset(struct state* s, double* p, double* v, double* a, double* av, double* aa) {
+  *matrix_element(&s->pos, 0, 0) = p[0];
+  *matrix_element(&s->pos, 1, 0) = p[1];
+  *matrix_element(&s->vel, 0, 0) = v[0];
+  *matrix_element(&s->vel, 1, 0) = v[1];
+  *matrix_element(&s->acc, 0, 0) = a[0];
+  *matrix_element(&s->acc, 1, 0) = a[1];
+  *matrix_element(&s->angular_vel, 0, 0) = av[0];
+  *matrix_element(&s->angular_vel, 1, 0) = av[1];
+  *matrix_element(&s->angular_acc, 0, 0) = aa[0];
+  *matrix_element(&s->angular_acc, 1, 0) = aa[1];
+}
+
+void state_delete(struct state* s) {
+  matrix_delete(&s->vel);
+  matrix_delete(&s->acc);
+  matrix_delete(&s->angular_vel);
+  matrix_delete(&s->angular_acc);
+}
+
+size_t state_size(struct state* s) {
+  return matrix_size(&s->pos)
+       + matrix_size(&s->vel)
+       + matrix_size(&s->acc)
+       + matrix_size(&s->angular_vel)
+       + matrix_size(&s->angular_acc);
+}
+
 void object_delete(struct object* o){
   polygon_delete(&o->shape);
-  matrix_delete(&o->vel);
-  matrix_delete(&o->acc);
-  matrix_delete(&o->angular_vel);
-  matrix_delete(&o->angular_acc);
+  state_delete(&o->state);
 }
 
 size_t object_size(struct object* o){
   return sizeof(double)
        + polygon_size(&o->shape)
-       + matrix_size(&o->vel)
-       + matrix_size(&o->acc)
-       + matrix_size(&o->angular_vel)
-       + matrix_size(&o->angular_acc);
+       + state_size(&o->state);
 }
 
 void object_render(struct object* o, SDL_Renderer* renderer){
   polygon_render(&o->shape, renderer); 
 }
 
-struct object* new_square_object(double x, double y, double width, struct color color, double mass) {
+struct object* new_square_object(double width, struct color color, double mass) {
   struct object* o = malloc(sizeof(struct object));
-  o->shape = *new_square(x, y, width, color);
+  o->shape = *new_square(0.0, 0.0, width, color);
   o->mass = mass;
-  object_init(o);
   return o;
 }
 
-void object_init(struct object* o) {
-  o->vel = *matrix_new(3, 1, 0.0);
-  *matrix_element(&o->vel, 2, 0) = 1.0;
-  o->acc = *matrix_new(3, 1, 0.0);
-  *matrix_element(&o->acc, 2, 0) = 1.0;
-  o->angular_vel = *matrix_new(3, 1, 0.0);
-  *matrix_element(&o->angular_vel, 2, 0) = 1.0;
-  o->angular_acc = *matrix_new(3, 1, 0.0);
-  *matrix_element(&o->angular_acc, 2, 0) = 1.0;  
+void object_reset_state(struct object* o, double* p, double* v, double* a, double* av, double* aa) {
+  state_reset(&o->state, p, v, a, av, aa);
 }
+
 
 

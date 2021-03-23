@@ -11,8 +11,8 @@ struct object_container {
 
 struct object_container* object_container_new();
 void object_container_delete(struct object_container* oc);
-void insert_square(struct object_container* oc, unsigned x, unsigned y, unsigned width, struct color color, double mass);
-void object_container_pop(struct object_container* oc, unsigned i);
-void render_objects(struct object_container* oc, SDL_Renderer* renderer);
+void object_container_insert(struct object_container* oc, struct object* o);
+void object_container_pop(struct object_container* oc);
+void object_container_render(struct object_container* oc, SDL_Renderer* renderer);
 
 #endif

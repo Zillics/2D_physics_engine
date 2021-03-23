@@ -11,6 +11,10 @@ struct arena* arena_new(double x_min, double y_min, double x_max, double y_max){
   a->border = *new_square(x_min + 0.5*width, y_min + 0.5*height, width, color);
   return a;
 }
+void arena_delete(struct arena* a) {
+  object_container_delete(&a->objects);
+  polygon_delete(&a->border);
+}
 
 void arena_tick(struct arena* a, double dt) {
   struct object* o;
@@ -20,10 +24,13 @@ void arena_tick(struct arena* a, double dt) {
   a->t += dt;
 }
 
-
 void arena_render(struct arena* a, SDL_Renderer* renderer) {
   for(unsigned i = 0; i < a->objects.nObjects; i++) {
     object_render(a->objects.objects + i, renderer);
   }
   polygon_render(&a->border, renderer);
+}
+
+void arena_generate_object(struct arena* a, struct state* min_state, struct state* max_state) {
+
 }

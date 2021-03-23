@@ -18,6 +18,13 @@ void matrix_delete(struct matrix* A) {
   free(A->data);
 }
 
+void matrix_insert_col(struct matrix* A, double* x, unsigned j) {
+  assert(j < A->cols);
+  for(unsigned i = 0; i < A->rows; i++) {
+    *(A->data + j*A->rows + i) = *(x + i);
+  }
+}
+
 double* matrix_element(struct matrix* A, unsigned row, unsigned col) {
   assert(row < A->rows);
   assert(col < A->cols);
@@ -136,6 +143,21 @@ struct matrix matrices_multiply(unsigned N, struct matrix matrices[N]) {
     ret = matrix_multiply(&ret, &matrices[i]);
   }
   return ret;
+}
+
+struct matrix matrix_cross_product(struct matrix* a, struct matrix* b) {
+  assert(matrix_is_vector(a));
+  assert(matrix_is_vector(b));
+  unsigned N = a->rows * a->cols;
+  assert(N == b->rows * b->cols);
+  struct matrix* axb = matrix_new(N, 1, 0.0);
+  for(unsigned i = 0; i < N; i++) {
+    unsigned i1 = (N - 2 + i) % N;
+    unsigned i2 = (N - 1 + i) % N;
+    *matrix_element(axb, i, 0) += *(a->data + i1) * (*(b->data + i2));
+    *matrix_element(axb, i, 0) -= *(a->data + i2) * (*(b->data + i1));
+  }
+  return *axb;
 }
 
 size_t matrix_size(struct matrix* A) {
@@ -269,4 +291,8 @@ struct matrix unit_vector(struct matrix* v) {
   unsigned N = v->rows * v->cols;
   double norm = vector_norm_L2(v->data, N);
   return matrix_multiply_scalar(v, 1.0/norm);
+}
+
+bool matrix_is_vector(struct matrix* v) {
+  return v->cols == 1 || v->rows == 1;
 }

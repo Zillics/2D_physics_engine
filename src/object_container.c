@@ -15,8 +15,7 @@ void object_container_delete(struct object_container* oc) {
   free(oc);
 }
 
-void insert_square(struct object_container* oc, unsigned x, unsigned y, unsigned width, struct color color, double mass) {
-  struct object* o = new_square_object(x, y, width, color, mass);
+void object_container_append(struct object_container* oc, struct object* o) {
   size_t size = object_size(o);
   oc->objects = realloc(oc->objects, oc->mem_objects + size);
   oc->objects[oc->nObjects] = *o;
@@ -24,11 +23,16 @@ void insert_square(struct object_container* oc, unsigned x, unsigned y, unsigned
   oc->nObjects += 1;
 }
 
-void pop_polygon(struct object_container* oc, unsigned i) {
-
+void object_container_pop(struct object_container* oc) {
+  struct object* o = oc->objects + oc->nObjects;
+  size_t size = object_size(o);
+  object_delete(o);
+  oc->objects = realloc(oc->objects, oc->mem_objects - size); 
+  oc->mem_objects -= size;
+  oc->nObjects -= 1;
 }
 
-void render_objects(struct object_container* oc, SDL_Renderer* renderer) {
+void object_container_render(struct object_container* oc, SDL_Renderer* renderer) {
   for(unsigned int i = 0; i < oc->nObjects; i++) {
     object_render(oc->objects + i, renderer);
   }

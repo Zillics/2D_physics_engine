@@ -12,8 +12,9 @@ struct arena {
 };
 
 struct arena* arena_new(double x_min, double y_min, double x_max, double y_max);
+void arena_delete(struct arena* a);
 void arena_tick(struct arena* a, double dt);
-
 void arena_render(struct arena* a, SDL_Renderer* renderer);
+void arena_generate_object(struct arena* a, struct state* min_state, struct state* max_state);
 
 #endif

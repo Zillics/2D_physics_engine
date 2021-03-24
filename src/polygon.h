@@ -21,7 +21,7 @@ size_t polygon_size(struct polygon* o);
 void polygon_delete(struct polygon* o);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);
 unsigned polygon_nVertices(struct polygon* o);
-double* polygon_point(struct polygon* o, unsigned i);
+double* polygon_vertex(struct polygon* o, unsigned i);
 /** Find normal vector of vertix between point i and point i + 1. 
  * Set inward to true/false to specify whether normal points inward/outward. */
 struct matrix polygon_edge_normal(struct polygon* o, unsigned i);
@@ -40,5 +40,7 @@ void polygon_rotate_deg(struct polygon* o, double deg);
 void polygon_vertex_normals(struct polygon* o, bool inward, struct matrix* n, struct matrix* c);
 void polygon_print(struct polygon* o);
 bool polygons_collide(unsigned N, struct polygon polygons[N]);
-
+double polygon_area(struct polygon* o);
+double polygon_inertia(struct polygon* o);
+double triangle_area(struct matrix* p1, struct matrix* p2, struct matrix* p3);
 #endif

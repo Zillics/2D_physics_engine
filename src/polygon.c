@@ -46,7 +46,7 @@ void polygon_delete(struct polygon* o) {
 unsigned polygon_nVertices(struct polygon* o) {
   return o->vertices.cols;
 }
-double* polygon_point(struct polygon* o, unsigned i) {
+double* polygon_vertex(struct polygon* o, unsigned i) {
   return o->vertices.data + i * o->vertices.rows;
 }
 
@@ -68,8 +68,8 @@ struct matrix polygon_compute_edge_normal(struct polygon* o, unsigned i, bool in
   struct matrix* n = matrix_new(3, 1, 0.0);
   // Swap x and y axes to get normal
   unsigned i2 = (i + 1) % polygon_nVertices(o);
-  *matrix_element(n, 0, 0) = polygon_point(o, i2)[0] - polygon_point(o, i)[0];
-  *matrix_element(n, 1, 0) = polygon_point(o, i2)[1] - polygon_point(o, i)[1];
+  *matrix_element(n, 0, 0) = polygon_vertex(o, i2)[0] - polygon_vertex(o, i)[0];
+  *matrix_element(n, 1, 0) = polygon_vertex(o, i2)[1] - polygon_vertex(o, i)[1];
   matrix_rotate(n, dir * 90);
   struct matrix ret = unit_vector(n);
   *matrix_element(&ret, 2, 0) = 1.0;
@@ -79,8 +79,8 @@ struct matrix polygon_compute_edge_normal(struct polygon* o, unsigned i, bool in
 struct matrix polygon_compute_edge_midpoint(struct polygon* o, unsigned i) {
   struct matrix* m = matrix_new(3, 1, 0.0);
   unsigned i2 = (i + 1) % polygon_nVertices(o);
-  double* p1 = polygon_point(o, i);
-  double* p2 = polygon_point(o, i2);
+  double* p1 = polygon_vertex(o, i);
+  double* p2 = polygon_vertex(o, i2);
   *matrix_element(m, 0, 0) = 0.5 * (p1[0] + p2[0]);
   *matrix_element(m, 1, 0) = 0.5 * (p1[1] + p2[1]);
   *matrix_element(m, 2, 0) = 1.0;
@@ -105,8 +105,8 @@ void polygon_centroid(struct polygon* o, double* x, double* y) {
   *y = 0.0;
   unsigned N = polygon_nVertices(o);
   for(unsigned int i = 0; i < N; i++) {
-    *x += polygon_point(o, i)[0];
-    *y += polygon_point(o, i)[1];
+    *x += polygon_vertex(o, i)[0];
+    *y += polygon_vertex(o, i)[1];
   }
   *x /= (double)N;
   *y /= (double)N;
@@ -152,7 +152,7 @@ void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
   for(unsigned i1 = 0; i1 < N; i1++) {
     unsigned i2 = (i1 + 1) % N;
     // Vertix
-    SDL_RenderDrawLine(renderer, polygon_point(o, i1)[0], polygon_point(o, i1)[1], polygon_point(o, i2)[0], polygon_point(o, i2)[1]);
+    SDL_RenderDrawLine(renderer, polygon_vertex(o, i1)[0], polygon_vertex(o, i1)[1], polygon_vertex(o, i2)[0], polygon_vertex(o, i2)[1]);
     // Normal
     double x1 = matrix_value(&o->edge_midpoints, 0, i1);
     double x2 = x1 + matrix_value(&o->edge_normals, 0, i1);
@@ -172,7 +172,7 @@ size_t polygon_size(struct polygon* o) {
 
 void polygon_print(struct polygon* o) {
   for(unsigned i = 0; i < polygon_nVertices(o); i++) {
-    printf("\t(%f, %f)\n", polygon_point(o, i)[0], polygon_point(o, i)[1]);
+    printf("\t(%f, %f)\n", polygon_vertex(o, i)[0], polygon_vertex(o, i)[1]);
   }
 }
 
@@ -200,4 +200,41 @@ bool polygons_collide(unsigned N, struct polygon polygons[N]) {
     }
   }
   return true;
+}
+
+
+double polygon_area(struct polygon* o) {
+  double area = 0.0;
+  for(unsigned i = 1; i < polygon_nVertices(o) - 2; i++) {
+    struct matrix* p1 = matrix_new(3, 1, 0.0);
+    matrix_insert_col(p1, polygon_vertex(o, i), 0.0);
+    struct matrix* p2 = matrix_new(3, 1, 0.0);
+    matrix_insert_col(p2, polygon_vertex(o, i + 1), 0.0);
+    struct matrix* p3 = matrix_new(3, 1, 0.0);
+    matrix_insert_col(p3, polygon_vertex(o, i + 2), 0.0);
+    area += triangle_area(p1, p2, p3);
+  }
+  return area;
+}
+
+double polygon_inertia(struct polygon* o) {
+  // TODO
+  return 0.0;
+}
+
+double triangle_area(struct matrix* p1, struct matrix* p2, struct matrix* p3) {
+  double area = 0.0;
+  struct matrix v12 = matrix_subtract(p2, p1);
+  struct matrix v13 = matrix_subtract(p3, p1);
+  struct matrix p4 = vector_projection(&v12, &v13);
+  // Triangle 1
+  struct matrix v14 = matrix_subtract(&p4, p1);
+  struct matrix v14xv12 = matrix_cross_product(&v14, &v12);
+  area += matrix_sum(&v14xv12);
+  // Triangle 2
+  struct matrix v23 = matrix_subtract(p3, p2);
+  struct matrix v24 = matrix_subtract(&p4, p2);
+  struct matrix v23xv24 = matrix_cross_product(&v23, &v24);
+  area += matrix_sum(&v23xv24);
+  return area;
 }

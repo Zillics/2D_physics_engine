@@ -111,6 +111,27 @@ struct matrix matrix_negative(struct matrix* A) {
   return *ret;
 }
 
+
+struct matrix matrix_add(struct matrix* A, struct matrix* B) {
+  struct matrix* C = matrix_new(A->rows, A->cols, 0.0);
+  unsigned N = A->rows * A->cols;
+  assert(N == B->rows * B->cols);
+  for(unsigned i = 0; i < N; i++) {
+    *(C->data + i) = *(A->data + i) + *(B->data + i);
+  }
+  return *C;
+}
+
+struct matrix matrix_subtract(struct matrix* A, struct matrix* B) {
+  struct matrix* C = matrix_new(A->rows, A->cols, 0.0);
+  unsigned N = A->rows * A->cols;
+  assert(N == B->rows * B->cols);
+  for(unsigned i = 0; i < N; i++) {
+    *(C->data + i) = *(A->data + i) - *(B->data + i);
+  }
+  return *C;
+}
+
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B) {
   assert(A->cols == B->rows);
   struct matrix* ret = matrix_new(A->rows, B->cols, 0);
@@ -240,6 +261,14 @@ struct matrix matrix_colwise_max(struct matrix* A) {
   return *ret;
 }
 
+double matrix_sum(struct matrix* A) {
+  double sum = 0.0;
+  for(unsigned i = 0; i < A->cols * A->rows; i++) {
+    sum += *(A->data + i);
+  }
+  return sum;
+}
+
 double matrix_min(struct matrix* A) {
   double min = A->data[0];
   for(unsigned k = 1; k < A->cols * A->rows; k++) {
@@ -295,4 +324,14 @@ struct matrix unit_vector(struct matrix* v) {
 
 bool matrix_is_vector(struct matrix* v) {
   return v->cols == 1 || v->rows == 1;
+}
+
+
+struct matrix vector_projection(struct matrix* a, struct matrix* b) {
+  struct matrix at = matrix_transpose(a);
+  struct matrix bt = matrix_transpose(b);
+  struct matrix aa = matrix_multiply(a, &at);
+  struct matrix bb = matrix_multiply(b, &bt);
+  double k = matrix_value(&aa, 0, 0) / matrix_value(&bb, 0, 0);
+  return matrix_multiply_scalar(b, k);
 }

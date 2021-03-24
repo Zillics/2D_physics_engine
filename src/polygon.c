@@ -9,8 +9,6 @@ struct polygon* new_square(int x, int y, unsigned width, struct color color) {
                           {x + 0.5 * width, y - 0.5 * width},
                           {x - 0.5 * width, y - 0.5 * width} };
   struct polygon* ret = polygon_new(4, vertices, color);
-  double xMid, yMid;
-  polygon_centroid(ret, &xMid, &yMid);
   return ret;
 }
 
@@ -34,6 +32,10 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
     *matrix_element(&o->edge_midpoints, 2, i) = 1.0;
   }
   o->color = color;
+  struct matrix* c = vector_new(3, 1.0);
+  polygon_centroid(o, vector_element(c, 0), vector_element(c, 1));
+  o->centroid = *c;
+  o->area = polygon_area(o);
   return o;
 }
 
@@ -205,36 +207,141 @@ bool polygons_collide(unsigned N, struct polygon polygons[N]) {
 
 double polygon_area(struct polygon* o) {
   double area = 0.0;
-  for(unsigned i = 1; i < polygon_nVertices(o) - 2; i++) {
-    struct matrix* p1 = matrix_new(3, 1, 0.0);
-    matrix_insert_col(p1, polygon_vertex(o, i), 0.0);
+  struct matrix* p1 = matrix_new(3, 1, 0.0);
+  matrix_insert_col(p1, polygon_vertex(o, 0), 0.0);
+  for(unsigned i = 1; i < polygon_nVertices(o) - 1; i++) {
     struct matrix* p2 = matrix_new(3, 1, 0.0);
-    matrix_insert_col(p2, polygon_vertex(o, i + 1), 0.0);
+    matrix_insert_col(p2, polygon_vertex(o, i), 0.0);
     struct matrix* p3 = matrix_new(3, 1, 0.0);
-    matrix_insert_col(p3, polygon_vertex(o, i + 2), 0.0);
-    area += triangle_area(p1, p2, p3);
+    matrix_insert_col(p3, polygon_vertex(o, i + 1), 0.0);
+    double ai = triangle_area(p1, p2, p3);
+    area += ai;
   }
   return area;
 }
 
-double polygon_inertia(struct polygon* o) {
-  // TODO
-  return 0.0;
+double polygon_moment_of_inertia(struct polygon* o, double ro) {
+  double I = 0.0;
+  struct matrix* p1 = vector_create(polygon_vertex(o, 0), 3);
+  for(unsigned i = 1; i < polygon_nVertices(o) - 1; i++) {
+    // Define points of triangle
+    struct matrix* p2 = vector_create(polygon_vertex(o, i), 3);
+    struct matrix* p3 = vector_create(polygon_vertex(o, i+1), 3);
+
+    // Find out p4
+    struct matrix v2 = matrix_subtract(p2, p1);
+    struct matrix v3 = matrix_subtract(p3, p1);
+    struct matrix proj23 = vector_projection(&v3, &v2);
+    struct matrix p4 = matrix_add(p1, &proj23); 
+
+    // Find out w1, h1
+    struct matrix v14 = matrix_subtract(&p4, p1);
+    double w1 = vector_norm_L2(v14.data, 2);
+    struct matrix v43 = matrix_subtract(p3, &p4);
+    double h1 = vector_norm_L2(v43.data, 2);
+
+    // Find out w2, h2
+    struct matrix v42 = matrix_subtract(p2, &p4);
+    double w2 = vector_norm_L2(v42.data, 2);
+    double h2 = h1;
+
+    // Moment of inertia of triangle1 around p3
+    double I1 = triangle_moment_of_inertia(h1, w1, ro);
+    // Icm = I - m*d^2
+    // Moment of inertia around triangle1 center of mass
+    double m1 = 0.5 * h1 * w1 * ro;
+    struct matrix c1 = triangle_centroid(p1->data, p3->data, p4.data);
+    double d3c1 = vector_distance(p3, &c1);
+    double Icm1 = I1 - (m1 * pow(d3c1, 2));
+    // Moment of inertia around polygon center of mass
+    double d1 = vector_distance(&c1, &o->centroid);
+    double I1total = Icm1 + (m1 * pow(d1, 2)); 
+    struct matrix v31 = matrix_subtract(p1, p3);
+    struct matrix v34 = matrix_subtract(&p4, p3);
+    double a1 = cross(v31.data, v34.data);
+    if(a1 > 0) {
+      I += I1total;
+    } else {
+      I -= I1total;
+    }
+    // Moment of inertia of triangle2 around p3
+    double I2 = triangle_moment_of_inertia(h2, w2, ro);
+    // Moment of inertia around traingle2 center of mass
+    double m2 = 0.5 * h2 * w2 * ro;
+    struct matrix c2 = triangle_centroid(p3->data, p4.data, p2->data);
+    double d3c2 = vector_distance(p3, &c2);
+    double Icm2 = I2 - (m2 * pow(d3c2, 2));
+    // Moment of inertia around polygon center of mass
+    double d2 = vector_distance(&c2, &o->centroid);
+    double I2total = Icm2 + (m2 * pow(d2, 2));
+    // Sum up moment of inertia 2
+    struct matrix v32 = matrix_subtract(p2, p3);
+    double a2 = cross(v34.data, v32.data);
+    if(a2 > 0) {
+      I += I2;
+    } else {
+      I -= I2;
+    }
+  }
+  return fabs(I);
+}
+
+double triangle_moment_of_inertia(double h, double w, double ro) {
+  return ro * (0.25 * (h * pow(w, 3)) + (1.0/12.0) * (pow(h, 3) * w));
+}
+
+double cross(double* p1, double* p2) {
+  return p1[0] * p2[1] - p2[0] * p1[1];
+}
+
+double triangle_area_signed(double* p1, double* p2, double* p3) {
+  double x1 = *(p1 + 0);
+  double y1 = *(p1 + 1);
+  double x2 = *(p2 + 0);
+  double y2 = *(p2 + 1);
+  double x3 = *(p3 + 0);
+  double y3 = *(p3 + 1);
+  return (x2 - x1) * (y3 - y2) - (x3 - x2) * (y2 - y1);
 }
 
 double triangle_area(struct matrix* p1, struct matrix* p2, struct matrix* p3) {
-  double area = 0.0;
   struct matrix v12 = matrix_subtract(p2, p1);
   struct matrix v13 = matrix_subtract(p3, p1);
-  struct matrix p4 = vector_projection(&v12, &v13);
-  // Triangle 1
-  struct matrix v14 = matrix_subtract(&p4, p1);
-  struct matrix v14xv12 = matrix_cross_product(&v14, &v12);
-  area += matrix_sum(&v14xv12);
-  // Triangle 2
-  struct matrix v23 = matrix_subtract(p3, p2);
-  struct matrix v24 = matrix_subtract(&p4, p2);
-  struct matrix v23xv24 = matrix_cross_product(&v23, &v24);
-  area += matrix_sum(&v23xv24);
-  return area;
+  struct matrix v13xv12 = matrix_cross_product(&v13, &v12);
+  return 0.5 * matrix_norm_L2(&v13xv12);
+}
+
+struct matrix triangle_centroid(double* p1, double* p2, double* p3) {
+  double cx = (1.0/3.0) * (p1[0] + p2[0] + p3[0]);
+  double cy = (1.0/3.0) * (p1[0] + p2[0] + p3[0]);
+  double data[3] = { cx, cy, 1.0 };
+  struct matrix* c = vector_create(data, 3);
+  return *c;
+}
+
+double triangle_area2(struct matrix* p1, struct matrix* p2, struct matrix* p3) {
+  struct matrix v2 = matrix_subtract(p2, p1);
+  struct matrix v3 = matrix_subtract(p3, p1);
+  struct matrix proj23 = vector_projection(&v2, &v3);
+  struct matrix p4 = matrix_add(p1, &proj23);
+  printf("p4:\n");
+  matrix_print(&p4);
+  struct matrix v4 = matrix_subtract(&p4, p1);
+  double x1 = matrix_value(&v4, 0, 0);
+  double y1 = matrix_value(&v4, 1, 0);
+  double x2 = matrix_value(&v3, 0, 0);
+  double y2 = matrix_value(&v3, 1, 0);
+  double a1 = x1 * y2 - x2 * y1;
+  printf("v4:\n");
+  matrix_print(&v4);
+  struct matrix v42 = matrix_subtract(p2, &p4);
+  struct matrix v43 = matrix_subtract(p3, &p4);
+  x1 = matrix_value(&v42, 0, 0);
+  y1 = matrix_value(&v42, 1, 0);
+  x2 = matrix_value(&v43, 0, 0);
+  y2 = matrix_value(&v43, 1, 0);
+  double a2 = x1 * y2 - x2 * y1;
+  printf("first area: %6.9f\n", a1); 
+  printf("second area: %6.9f\n", a2);
+  return 0.0;
 }

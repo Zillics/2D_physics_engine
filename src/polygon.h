@@ -11,7 +11,9 @@ struct polygon {
   struct matrix vertices;
   struct matrix edge_midpoints;
   struct matrix edge_normals;
+  struct matrix centroid;
   bool edge_normals_inward;
+  double area;
   struct color color;
 };
 
@@ -41,6 +43,12 @@ void polygon_vertex_normals(struct polygon* o, bool inward, struct matrix* n, st
 void polygon_print(struct polygon* o);
 bool polygons_collide(unsigned N, struct polygon polygons[N]);
 double polygon_area(struct polygon* o);
-double polygon_inertia(struct polygon* o);
+/** Compute polygon moment of inertia, given density ro. */
+double polygon_moment_of_inertia(struct polygon* o, double ro);
 double triangle_area(struct matrix* p1, struct matrix* p2, struct matrix* p3);
+double triangle_area_signed(double* p1, double* p2, double* p3);
+double triangle_area2(struct matrix* p1, struct matrix* p2, struct matrix* p3);
+struct matrix triangle_centroid(double* p1, double* p2, double* p3);
+double triangle_moment_of_inertia(double h, double w, double ro);
+double cross(double* p1, double* p2);
 #endif

@@ -115,6 +115,32 @@
     ck_assert_double_eq_tol(matrix_value(&axb, 0, 0), 3.79, 1e-6); 
     ck_assert_double_eq_tol(matrix_value(&axb, 1, 0), -6.0768, 1e-6); 
     ck_assert_double_eq_tol(matrix_value(&axb, 2, 0), 15.94, 1e-6);
+
+  }
+  END_TEST
+
+  START_TEST (test_vector_dot) {
+    struct matrix* a = matrix_new(3,1,0);
+    struct matrix* b = matrix_new(3,1,0);
+    double a_data[3] = { 2.351, 3.4531, -0.0531 };
+    double b_data[3] = { 34.34, -0.04, 4.05 };
+    matrix_insert_col(a, a_data, 0);
+    matrix_insert_col(b, b_data, 0);
+    double ab = vector_dot(a, b);
+    ck_assert_double_eq_tol(ab, a_data[0] * b_data[0] + a_data[1] * b_data[1] + a_data[2] * b_data[2], 1e-6);
+  }
+
+  START_TEST (test_vector_projection) {
+    struct matrix* a = matrix_new(3,1,0); 
+    struct matrix* b = matrix_new(3,1,0); 
+    double a_data[3] = { 5.0, 4.0, 1.0 };
+    double b_data[3] = { 3.0, 4.0, 5.0 };
+    matrix_insert_col(a, a_data, 0);
+    matrix_insert_col(b, b_data, 0);
+    struct matrix proj = vector_projection(a, b);
+    ck_assert_double_eq_tol(matrix_value(&proj, 0, 0), 2.16, 1e-6);
+    ck_assert_double_eq_tol(matrix_value(&proj, 1, 0), 2.88, 1e-6);
+    ck_assert_double_eq_tol(matrix_value(&proj, 2, 0), 3.6, 1e-6);
   }
   END_TEST
 
@@ -132,6 +158,8 @@ Suite* matrix_suite(void)
     tcase_add_test(tc_core, test_matrix_min_max);
     tcase_add_test(tc_core, test_matrix_transpose);
     tcase_add_test(tc_core, test_cross_product);
+    tcase_add_test(tc_core, test_vector_dot);
+    tcase_add_test(tc_core, test_vector_projection);
     suite_add_tcase(s, tc_core);
 
     return s;

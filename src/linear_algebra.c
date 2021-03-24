@@ -18,6 +18,21 @@ void matrix_delete(struct matrix* A) {
   free(A->data);
 }
 
+struct matrix* vector_new(unsigned N, double initVal) {
+  return matrix_new(N, 1, initVal);
+}
+
+struct matrix* vector_create(double* data, unsigned N) {
+  struct matrix* v = malloc(sizeof(struct matrix));
+  v->data = malloc(N * sizeof(double));
+  for(unsigned i = 0; i < N; i++) {
+    v->data[i] = data[i];
+  }
+  v->rows = N;
+  v->cols = 1;
+  return v;
+}
+
 void matrix_insert_col(struct matrix* A, double* x, unsigned j) {
   assert(j < A->cols);
   for(unsigned i = 0; i < A->rows; i++) {
@@ -186,6 +201,7 @@ size_t matrix_size(struct matrix* A) {
 }
 
 void matrix_print(struct matrix* A) {
+  printf("---------------\n");
   for(unsigned i = 0; i < A->rows; i++) {
     for(unsigned j = 0; j < A->cols; j++) {
       printf("%6.4f", matrix_value(A, i, j));
@@ -195,6 +211,7 @@ void matrix_print(struct matrix* A) {
     }
     printf("\n");
   }
+  printf("---------------\n");
 }
 
 struct matrix matrix_rowwise_min(struct matrix* A) {
@@ -297,6 +314,22 @@ double matrix_norm_L2(struct matrix* A) {
   return ss;
 }
 
+double* vector_element(struct matrix* v, unsigned i) {
+  return matrix_element(v, i, 0);
+}
+
+double vector_dot(struct matrix* a, struct matrix* b) {
+  assert(matrix_is_vector(a));
+  assert(matrix_is_vector(b));
+  unsigned N = a->rows * a->cols;
+  assert(N == b->rows * b->cols);
+  double ret = 0.0;
+  for(unsigned i = 0; i < N; i++) {
+    ret += *(a->data + i) * (*(b->data + i));
+  }
+  return ret;
+}
+
 double vector_norm_L2(double* v, unsigned N) {
   double ss = 0.0;
   for(unsigned i = 0; i < N; i++) {
@@ -326,12 +359,17 @@ bool matrix_is_vector(struct matrix* v) {
   return v->cols == 1 || v->rows == 1;
 }
 
-
 struct matrix vector_projection(struct matrix* a, struct matrix* b) {
-  struct matrix at = matrix_transpose(a);
-  struct matrix bt = matrix_transpose(b);
-  struct matrix aa = matrix_multiply(a, &at);
-  struct matrix bb = matrix_multiply(b, &bt);
-  double k = matrix_value(&aa, 0, 0) / matrix_value(&bb, 0, 0);
-  return matrix_multiply_scalar(b, k);
+  // a1 = ((a . b) / (b . b))b
+  double ab = vector_dot(a, b);
+  double bb = vector_dot(b, b);
+  return matrix_multiply_scalar(b, ab/bb);
 }
+
+double vector_distance(struct matrix* v1, struct matrix* v2) {
+  assert(matrix_is_vector(v1));
+  assert(matrix_is_vector(v2));
+  struct matrix diff = matrix_subtract(v1, v2);
+  return vector_norm_L2(diff.data, diff.rows);
+}
+

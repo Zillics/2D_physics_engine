@@ -13,8 +13,17 @@ struct color collision_color = RED;
 
 int main(int argc, char* argv[])
 {
-  struct polygon* poly = new_square(200, 200, 30, default_color);
-
+  //struct polygon* poly = new_square(200, 200, 30, default_color);
+  struct color color = GREEN;
+  // 10 * 2 square
+  double p[3][2] = {{0.0, 0.0},
+                    {40.0, 30.0},
+                    {20.0, 0.0}};
+  struct polygon* o = polygon_new(3, p, color);
+  double I = polygon_moment_of_inertia(o, 1.0);
+  printf("inertia: %6.9f\n", I);
+  double v[2] = {200, 200};
+  polygon_translate(o, v, 1.0);
     if (SDL_Init(SDL_INIT_VIDEO) == 0) {
         SDL_Window* window = NULL;
         SDL_Renderer* renderer = NULL;
@@ -29,10 +38,7 @@ int main(int argc, char* argv[])
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
                 SDL_RenderClear(renderer);
 
-                polygon_render(poly, renderer);
-                double dir[3] = {0.25, -0.2, 1.0};
-                polygon_translate(poly, dir, 1.0);
-                polygon_rotate(poly, 1.0);
+                polygon_render(o, renderer);
                 // Display all rendered stuff
                 SDL_RenderPresent(renderer);
                 while (SDL_PollEvent(&event)) {
@@ -78,7 +84,7 @@ int main(int argc, char* argv[])
         if (window) {
             SDL_DestroyWindow(window);
         }
-        polygon_delete(poly);
+        polygon_delete(o);
     }
     SDL_Quit();
     return 0;

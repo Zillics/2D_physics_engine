@@ -39,12 +39,12 @@ $(EXEC_DIR)/%: $(OBJS) $(BUILD_DIR)/src/mains/%.c.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/src/test/%: $(OBJS) $(BUILD_DIR)/src/test/%.c.o
-	$(CC) $^ -o $@ $(LDFLAGS)
+	@$(CC) $^ -o $@ $(LDFLAGS)
 	$@
 
 $(BUILD_DIR)/%.c.o: %.c
-	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:

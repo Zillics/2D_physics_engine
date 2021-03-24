@@ -11,6 +11,8 @@ struct matrix {
 };
 
 struct matrix* matrix_new(unsigned rows, unsigned cols, double initVal);
+struct matrix* vector_new(unsigned N, double initVal);
+struct matrix* vector_create(double* data, unsigned N);
 void matrix_delete(struct matrix* A);
 void matrix_insert_col(struct matrix* A, double* x, unsigned i);
 double* matrix_element(struct matrix* A, unsigned row, unsigned col);
@@ -41,9 +43,13 @@ double matrix_sum(struct matrix* A);
 double matrix_min(struct matrix* A);
 double matrix_max(struct matrix* A);
 double matrix_norm_L2(struct matrix* A);
+double* vector_element(struct matrix* v, unsigned i);
 double vector_norm_L2(double* v, unsigned N);
+double vector_dot(struct matrix* a, struct matrix* b);
+/** proj_b a, or projection of vector a on vector b */
 struct matrix vector_projection(struct matrix* a, struct matrix* b);
 double vector_angle(struct matrix* v1, struct matrix* v2);
+double vector_distance(struct matrix* v1, struct matrix* v2);
 struct matrix unit_vector(struct matrix* v);
 bool matrix_is_vector(struct matrix* v);
 

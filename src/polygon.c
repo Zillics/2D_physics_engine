@@ -1,4 +1,5 @@
 #include "polygon.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "winding_number_algorithm.h"
@@ -37,6 +38,30 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
   o->centroid = *c;
   o->area = polygon_area(o);
   return o;
+}
+
+struct polygon* polygon_generate(unsigned N, double r) {
+  double direction[3] = {0.0, r, 1.0};
+  struct matrix* dir = vector_create(direction, 3);
+  struct matrix T1 = translation_matrix_2D(0.0, 0.5*r);
+  struct matrix T2 = translation_matrix_2D(0.0, -0.5*r);
+  double rads[N];
+  random_doubles(0, 2*M_PI, N, rads);
+  sort(rads, N);
+  double vertices[N][2];
+  for(unsigned i = 0; i < N; i++) {
+    struct matrix transformations[3] = {T1,
+                                        rotation_matrix_2D(rads[i]),
+                                        T2};
+    struct matrix TRT = matrices_multiply(3, transformations);
+    struct matrix dir_i = matrix_multiply(&TRT, dir);
+    double k = random_double(0.0, 1.0);
+    struct matrix pi = matrix_multiply_scalar(&dir_i, k);
+    vertices[i][0] = *(pi.data + 0);
+    vertices[i][1] = *(pi.data + 1);
+  }
+  struct color color = color_green();
+  return polygon_new(N, vertices, color);
 }
 
 void polygon_delete(struct polygon* o) {
@@ -178,7 +203,35 @@ void polygon_print(struct polygon* o) {
   }
 }
 
-bool polygons_collide(unsigned N, struct polygon polygons[N]) {
+bool polygon_axes_overlap(struct polygon* o1, struct polygon* o2) {
+    for(unsigned axis = 0; axis < polygon_nVertices(o1); axis++) {
+      // 1. Compute normal of current vertix
+      struct matrix normal = polygon_edge_normal(o1, axis);
+      // 2. Compute projections of o1 and o2 vertices on normal
+      struct matrix vertices1 = matrix_transpose(&o1->vertices);
+      struct matrix vertices2 = matrix_transpose(&o2->vertices);
+      struct matrix projections1 = matrix_multiply(&vertices1, &normal);
+      struct matrix projections2 = matrix_multiply(&vertices2, &normal);
+      // 3. Check if there is overlap betwen projections
+      double min1 = matrix_min(&projections1);
+      double max1 = matrix_max(&projections1);
+      double min2 = matrix_min(&projections2);
+      double max2 = matrix_max(&projections2);
+      bool overlaps = fmax(min1, min2) < fmin(max1, max2);
+      if(!overlaps) {
+        return false;
+      }
+    }
+  return true;
+}
+
+bool polygons_collide(struct polygon* o1, struct polygon* o2) {
+  bool overlap1 = polygon_axes_overlap(o1, o2);
+  bool overlap2 = polygon_axes_overlap(o2, o1);
+  return overlap1 && overlap2;
+}
+
+bool polygons_collide_N(unsigned N, struct polygon polygons[N]) {
   for(unsigned i = 0; i < N; i++) {
     struct polygon* o1 = polygons + i;
     struct polygon* o2 = polygons + (i + 1) % N;

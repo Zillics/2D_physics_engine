@@ -18,8 +18,23 @@ void arena_delete(struct arena* a) {
 
 void arena_tick(struct arena* a, double dt) {
   struct object* o;
-  for(unsigned i = 0; a->objects.nObjects; i++) {
+  unsigned N = a->objects.nObjects;
+  for(unsigned i = 0; N; i++) {
     o = a->objects.objects + i;
+    object_tick(o, dt);
+    o->collides = false;
+    o->shape.color = color_green();
+  }
+  for(unsigned i = 0; i < N; i++) {
+    o = a->objects.objects + i;
+    for(unsigned j = 0; j < N - 1; j++) {
+      struct object* o2 = a->objects.objects + ((i + 1 + j) % N);
+      if(objects_collide(o, o2)) {
+        o->collides = true;
+        o2->collides = true;
+        o->shape.color = color_red();
+      }
+    }
   }
   a->t += dt;
 }

@@ -19,6 +19,8 @@ struct polygon {
 
 struct polygon* new_square(int x, int y, unsigned width, struct color color);
 struct polygon* polygon_new(unsigned nVertices, double vertices[2][nVertices], struct color color);
+/** Randomly generate a simple polygon of N vertices. */
+struct polygon* polygon_generate(unsigned N, double r);
 size_t polygon_size(struct polygon* o);
 void polygon_delete(struct polygon* o);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);
@@ -41,7 +43,8 @@ void polygon_rotate_deg(struct polygon* o, double deg);
  * Set inward to true/false for normals pointing inwards/outwards. */
 void polygon_vertex_normals(struct polygon* o, bool inward, struct matrix* n, struct matrix* c);
 void polygon_print(struct polygon* o);
-bool polygons_collide(unsigned N, struct polygon polygons[N]);
+bool polygons_collide(struct polygon* o1, struct polygon* o2);
+bool polygons_collide_N(unsigned N, struct polygon polygons[N]);
 double polygon_area(struct polygon* o);
 /** Compute polygon moment of inertia, given density ro. */
 double polygon_moment_of_inertia(struct polygon* o, double ro);

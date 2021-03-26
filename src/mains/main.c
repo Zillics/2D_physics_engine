@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include "../polygon.h"
+#include "../object.h"
 #include "../object_container.h"
 #include "../linear_algebra.h"
 
@@ -19,11 +20,7 @@ int main(int argc, char* argv[])
   double p[3][2] = {{0.0, 0.0},
                     {40.0, 30.0},
                     {20.0, 0.0}};
-  struct polygon* o = polygon_new(3, p, color);
-  double I = polygon_moment_of_inertia(o, 1.0);
-  printf("inertia: %6.9f\n", I);
-  double v[2] = {200, 200};
-  polygon_translate(o, v, 1.0);
+  struct object* o = new_square_object(30, color, 1.0);
     if (SDL_Init(SDL_INIT_VIDEO) == 0) {
         SDL_Window* window = NULL;
         SDL_Renderer* renderer = NULL;
@@ -38,7 +35,7 @@ int main(int argc, char* argv[])
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
                 SDL_RenderClear(renderer);
 
-                polygon_render(o, renderer);
+                object_render(o, renderer);
                 // Display all rendered stuff
                 SDL_RenderPresent(renderer);
                 while (SDL_PollEvent(&event)) {
@@ -56,12 +53,16 @@ int main(int argc, char* argv[])
                       case SDL_KEYDOWN:
                         switch(event.key.keysym.scancode) {
                           case SDL_SCANCODE_A:
+                            object_rotate(o, -0.5);
                             break;
                           case SDL_SCANCODE_S:
+                            object_translate(o, o->direction.data, 1.0);
                             break;
                           case SDL_SCANCODE_D:
+                            object_rotate(o, 0.5);
                             break;
                           case SDL_SCANCODE_W:
+                            object_translate(o, o->direction.data, -1.0);
                             break;
                           default:
                             break;
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
         if (window) {
             SDL_DestroyWindow(window);
         }
-        polygon_delete(o);
+        object_delete(o);
     }
     SDL_Quit();
     return 0;

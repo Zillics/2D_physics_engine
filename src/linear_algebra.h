@@ -24,6 +24,7 @@ size_t matrix_size(struct matrix* A);
 void matrix_rotate(struct matrix* A, double deg);
 void matrix_rotate_deg(struct matrix* A, double rad);
 void matrix_rotate_rad(struct matrix* A, double rad);
+void matrix_reset(struct matrix* A, double val);
 struct matrix matrix_transpose(struct matrix* A);
 struct matrix matrix_negative(struct matrix* A);
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 

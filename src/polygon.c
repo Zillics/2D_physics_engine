@@ -41,22 +41,23 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
 }
 
 struct polygon* polygon_generate(unsigned N, double r) {
+  double vertices[N][2];
   double direction[3] = {0.0, r, 1.0};
   struct matrix* dir = vector_create(direction, 3);
-  struct matrix T1 = translation_matrix_2D(0.0, 0.5*r);
-  struct matrix T2 = translation_matrix_2D(0.0, -0.5*r);
   double rads[N];
+  // Generate random angles from range 0..360 degrees
   random_doubles(0, 2*M_PI, N, rads);
-  sort(rads, N);
-  double vertices[N][2];
+  dsort(rads, N);
+  double prev_rad = 0.0;
   for(unsigned i = 0; i < N; i++) {
-    struct matrix transformations[3] = {T1,
-                                        rotation_matrix_2D(rads[i]),
-                                        T2};
-    struct matrix TRT = matrices_multiply(3, transformations);
-    struct matrix dir_i = matrix_multiply(&TRT, dir);
-    double k = random_double(0.0, 1.0);
-    struct matrix pi = matrix_multiply_scalar(&dir_i, k);
+    // 1. Rotate line s.t its angle is rads[i]
+    double rad = rads[i] - prev_rad;
+    prev_rad = rads[i];
+    struct matrix R = rotation_matrix_2D(rad);
+    *dir = matrix_multiply(&R, dir);
+    // 2. Generate a random point somewhere on line
+    double k = random_double(0.2, 1.0);
+    struct matrix pi = matrix_multiply_scalar(dir, k);
     vertices[i][0] = *(pi.data + 0);
     vertices[i][1] = *(pi.data + 1);
   }
@@ -166,11 +167,10 @@ void polygon_rotate_rad(struct polygon* o, double rad) {
 }
 
 void polygon_translate(struct polygon* o, double* v, double k) {
-  double xMid, yMid;
-  polygon_centroid(o, &xMid, &yMid);
   struct matrix T = translation_matrix_2D(k*v[0], k*v[1]);
   o->vertices = matrix_multiply(&T, &o->vertices);
   o->edge_midpoints = matrix_multiply(&T, &o->edge_midpoints);
+  o->centroid = matrix_multiply(&T, &o->centroid);
 }
 
 void polygon_render(struct polygon* o, SDL_Renderer* renderer) {

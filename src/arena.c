@@ -46,6 +46,3 @@ void arena_render(struct arena* a, SDL_Renderer* renderer) {
   polygon_render(&a->border, renderer);
 }
 
-void arena_generate_object(struct arena* a, struct state* min_state, struct state* max_state) {
-
-}

@@ -11,7 +11,7 @@ struct object_container {
 
 struct object_container* object_container_new();
 void object_container_delete(struct object_container* oc);
-void object_container_insert(struct object_container* oc, struct object* o);
+void object_container_append(struct object_container* oc, struct object* o);
 void object_container_pop(struct object_container* oc);
 void object_container_render(struct object_container* oc, SDL_Renderer* renderer);
 

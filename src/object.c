@@ -1,57 +1,44 @@
 #include "object.h"
 
-struct state* state_new() {
-  struct state* s = malloc(sizeof(struct state));
-  s->pos = *matrix_new(3, 1, 0.0);
-  s->vel = *matrix_new(3, 1, 0.0);
-  s->acc = *matrix_new(3, 1, 0.0);
-  s->angular_vel = *matrix_new(3, 1, 0.0);
-  s->angular_acc = *matrix_new(3, 1, 0.0);
-  *matrix_element(&s->pos, 2, 0) = 1.0;
-  *matrix_element(&s->vel, 2, 0) = 1.0;
-  *matrix_element(&s->acc, 2, 0) = 1.0;
-  *matrix_element(&s->angular_vel, 2, 0) = 1.0;
-  *matrix_element(&s->angular_acc, 2, 0) = 1.0;
-  return s;
+struct object* object_generate(unsigned nPoints, double r) {
+  struct object* o = malloc(sizeof(struct object));
+  o->shape = *polygon_generate(nPoints, r);
+  double direction[3] = { 0.0, 1.0, 1.0 };
+  o->direction = *vector_create(direction, 3);
+  o->state = *vector_new(9, 0.0);
+  object_reset_state(o);
+  o->mass = 1.0;
+  return o;
 }
 
-void state_reset(struct state* s, double* p, double* v, double* a, double* av, double* aa) {
-  *matrix_element(&s->pos, 0, 0) = p[0];
-  *matrix_element(&s->pos, 1, 0) = p[1];
-  *matrix_element(&s->vel, 0, 0) = v[0];
-  *matrix_element(&s->vel, 1, 0) = v[1];
-  *matrix_element(&s->acc, 0, 0) = a[0];
-  *matrix_element(&s->acc, 1, 0) = a[1];
-  *matrix_element(&s->angular_vel, 0, 0) = av[0];
-  *matrix_element(&s->angular_vel, 1, 0) = av[1];
-  *matrix_element(&s->angular_acc, 0, 0) = aa[0];
-  *matrix_element(&s->angular_acc, 1, 0) = aa[1];
-}
-
-void state_delete(struct state* s) {
-  matrix_delete(&s->vel);
-  matrix_delete(&s->acc);
-  matrix_delete(&s->angular_vel);
-  matrix_delete(&s->angular_acc);
-}
-
-size_t state_size(struct state* s) {
-  return matrix_size(&s->pos)
-       + matrix_size(&s->vel)
-       + matrix_size(&s->acc)
-       + matrix_size(&s->angular_vel)
-       + matrix_size(&s->angular_acc);
+struct object* new_square_object(double width, struct color color, double mass) {
+  struct object* o = malloc(sizeof(struct object));
+  o->shape = *new_square(0.0, 0.0, width, color);
+  double direction[3] = { 0.0, 1.0, 1.0 };
+  o->direction = *vector_create(direction, 3);
+  o->state = *vector_new(9, 0.0);
+  object_reset_state(o);
+  o->mass = mass;
+  return o;
 }
 
 void object_delete(struct object* o){
   polygon_delete(&o->shape);
-  state_delete(&o->state);
+  matrix_delete(&o->direction);
+  matrix_delete(&o->state);
+}
+
+void object_reset_state(struct object* o) {
+  matrix_reset(&o->state, 0.0);
+  *vector_element(&o->state, 0) = *vector_element(&o->shape.centroid, 0);
+  *vector_element(&o->state, 1) = *vector_element(&o->shape.centroid, 1);
 }
 
 size_t object_size(struct object* o){
-  return sizeof(double)
+  return sizeof(struct object)
        + polygon_size(&o->shape)
-       + state_size(&o->state);
+       + matrix_size(&o->state)
+       + matrix_size(&o->direction);
 }
 
 bool objects_collide(struct object* o1, struct object* o2) {
@@ -63,7 +50,14 @@ void object_render(struct object* o, SDL_Renderer* renderer){
 }
 
 void object_tick(struct object* o, double dt) {
+  // TODO
+}
 
+void object_place(struct object* o, double x, double y) {
+  double target_[3] = { x, y, 1.0 };
+  struct matrix* target = vector_create(target_, 3);
+  struct matrix move = matrix_subtract(target, &o->shape.centroid);
+  polygon_translate(&o->shape, move.data, 1.0);
 }
 
 void object_translate(struct object* o, double* v, double k) {
@@ -73,19 +67,6 @@ void object_translate(struct object* o, double* v, double k) {
 void object_rotate(struct object* o, double deg) {
   polygon_rotate_deg(&o->shape, deg);
   matrix_rotate_deg(&o->direction, deg);
-}
-
-struct object* new_square_object(double width, struct color color, double mass) {
-  struct object* o = malloc(sizeof(struct object));
-  o->shape = *new_square(0.0, 0.0, width, color);
-  double direction[3] = { 0.0, 1.0, 1.0 };
-  o->direction = *vector_create(direction, 3);
-  o->mass = mass;
-  return o;
-}
-
-void object_reset_state(struct object* o, double* p, double* v, double* a, double* av, double* aa) {
-  state_reset(&o->state, p, v, a, av, aa);
 }
 
 

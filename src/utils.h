@@ -11,7 +11,8 @@ double random_double(double x_min, double x_max);
 /** Generate N random doubles and put them into arr */
 void random_doubles(double x_min, double x_max, unsigned N, double* arr);
 
-/** Sort array, consisting of N elements */
-void sort(double* arr, unsigned N);
+/** Sort array, consisting of N doubles */
+void dsort(double* arr, unsigned N);
+int dcomp(const void* _a, const void* _b);
 
 #endif

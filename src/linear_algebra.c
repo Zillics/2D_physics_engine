@@ -89,6 +89,13 @@ void matrix_rotate_rad(struct matrix* A, double rad) {
   *A = matrix_multiply(&R, A);
 }
 
+void matrix_reset(struct matrix* A, double val) {
+  unsigned N = A->rows * A->cols;
+  for(unsigned i = 0; i < N; i++) {
+    *(A->data + i) = val;
+  }
+}
+
 struct matrix rotation_matrix_2D(double rad) {
   struct matrix* R = matrix_new(3, 3, 0.0);
   *matrix_element(R, 0, 0) = cos(rad);

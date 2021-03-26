@@ -16,7 +16,12 @@ void random_doubles(double x_min, double x_max, unsigned N, double* arr) {
   }
 }
 
+int dcomp(const void* _a, const void* _b) {
+  double a = *((double*)_a); 
+  double b = *((double*)_b); 
+  return (a > b) - (a < b);
+}
 
-void sort(double* arr, unsigned N) {
-  
+void dsort(double* arr, unsigned N) {
+  qsort(arr, N, sizeof(double), dcomp);
 }

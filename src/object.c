@@ -7,18 +7,18 @@ struct object* object_generate(unsigned nPoints, double r) {
   o->direction = *vector_create(direction, 3);
   o->state = *vector_new(9, 0.0);
   object_reset_state(o);
-  o->mass = 1.0;
+  o->density = 1.0;
   return o;
 }
 
-struct object* new_square_object(double width, struct color color, double mass) {
+struct object* new_square_object(double width, struct color color, double density) {
   struct object* o = malloc(sizeof(struct object));
   o->shape = *new_square(0.0, 0.0, width, color);
   double direction[3] = { 0.0, 1.0, 1.0 };
   o->direction = *vector_create(direction, 3);
   o->state = *vector_new(9, 0.0);
   object_reset_state(o);
-  o->mass = mass;
+  o->density = density;
   return o;
 }
 
@@ -50,7 +50,19 @@ void object_render(struct object* o, SDL_Renderer* renderer){
 }
 
 void object_tick(struct object* o, double dt) {
-  // TODO
+  double dx = object_vel(o)[0] * dt + object_acc(o)[0] * dt * dt;
+  double dy = object_vel(o)[1] * dt + object_acc(o)[1] * dt * dt;
+  double ddx = object_acc(o)[0] * dt;
+  double ddy = object_acc(o)[1] * dt;
+  double dp[2] = { dx, dy };
+  object_translate(o, dp, 1.0);
+  double da = object_angle(o)[0] + object_angvel(o)[0] * dt + object_angacc(o)[0] * dt * dt;
+  object_rotate(o, da);
+  // Update state
+  *(object_pos(o) + 0) += dx;
+  *(object_pos(o) + 1) += dy;
+  *(object_vel(o) + 0) += ddx;
+  *(object_vel(o) + 1) += ddy;
 }
 
 void object_place(struct object* o, double x, double y) {
@@ -69,5 +81,9 @@ void object_rotate(struct object* o, double deg) {
   matrix_rotate_deg(&o->direction, deg);
 }
 
-
-
+double* object_pos(struct object* o) { return o->state.data + 0; }
+double* object_vel(struct object* o) { return o->state.data + 2; }
+double* object_acc(struct object* o) { return o->state.data + 4; }
+double* object_angle(struct object* o) { return o->state.data + 6; }
+double* object_angvel(struct object* o) { return o->state.data + 7; }
+double* object_angacc(struct object* o) { return o->state.data + 8; }

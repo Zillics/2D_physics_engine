@@ -19,12 +19,14 @@ void arena_delete(struct arena* a) {
 void arena_tick(struct arena* a, double dt) {
   struct object* o;
   unsigned N = a->objects.nObjects;
-  for(unsigned i = 0; N; i++) {
+
+  for(unsigned i = 0; i < N; i++) {
     o = a->objects.objects + i;
     object_tick(o, dt);
     o->collides = false;
     o->shape.color = color_green();
   }
+  /*
   for(unsigned i = 0; i < N; i++) {
     o = a->objects.objects + i;
     for(unsigned j = 0; j < N - 1; j++) {
@@ -33,9 +35,11 @@ void arena_tick(struct arena* a, double dt) {
         o->collides = true;
         o2->collides = true;
         o->shape.color = color_red();
+        o2->shape.color = color_red();
       }
     }
   }
+  */
   a->t += dt;
 }
 
@@ -45,4 +49,3 @@ void arena_render(struct arena* a, SDL_Renderer* renderer) {
   }
   polygon_render(&a->border, renderer);
 }
-

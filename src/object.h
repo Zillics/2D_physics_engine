@@ -7,7 +7,7 @@
 
 struct object {
   struct polygon shape;
-  double mass;
+  double density;
   bool collides;
   /** x, y, dx, dy, ddx, ddy, a, da, dda */
   struct matrix state;
@@ -25,5 +25,11 @@ bool objects_collide(struct object* o1, struct object* o2);
 void object_place(struct object* o, double x, double y);
 void object_translate(struct object* o, double* v, double k);
 void object_rotate(struct object* o, double deg);
+double* object_pos(struct object* o); 
+double* object_vel(struct object* o); 
+double* object_acc(struct object* o); 
+double* object_angle(struct object* o); 
+double* object_angvel(struct object* o); 
+double* object_angacc(struct object* o); 
 #endif
 

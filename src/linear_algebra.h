@@ -13,6 +13,7 @@ struct matrix {
 struct matrix* matrix_new(unsigned rows, unsigned cols, double initVal);
 struct matrix* vector_new(unsigned N, double initVal);
 struct matrix* vector_create(double* data, unsigned N);
+struct matrix* vector_generate(struct matrix* min, struct matrix* max);
 void matrix_delete(struct matrix* A);
 void matrix_insert_col(struct matrix* A, double* x, unsigned i);
 double* matrix_element(struct matrix* A, unsigned row, unsigned col);
@@ -45,6 +46,7 @@ double matrix_min(struct matrix* A);
 double matrix_max(struct matrix* A);
 double matrix_norm_L2(struct matrix* A);
 double* vector_element(struct matrix* v, unsigned i);
+double vector_value(struct matrix* v, unsigned i);
 double vector_norm_L2(double* v, unsigned N);
 double vector_dot(struct matrix* a, struct matrix* b);
 /** proj_b a, or projection of vector a on vector b */

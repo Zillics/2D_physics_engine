@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "utils.h"
 #include "linear_algebra.h"
 
 struct matrix* matrix_new(unsigned rows, unsigned cols, double initVal) {
@@ -30,6 +31,19 @@ struct matrix* vector_create(double* data, unsigned N) {
   }
   v->rows = N;
   v->cols = 1;
+  return v;
+}
+
+struct matrix* vector_generate(struct matrix* min, struct matrix* max) {
+  assert(matrix_is_vector(min));
+  assert(matrix_is_vector(max));
+
+  unsigned N = min->rows * min->cols;
+  assert(N == max->rows * max->cols);
+  struct matrix* v = vector_new(N, 0.0);
+  for(unsigned i = 0; i < N; i++) {
+    *vector_element(v, i) = random_double(vector_value(min, i), vector_value(max, i));
+  }
   return v;
 }
 
@@ -208,7 +222,6 @@ size_t matrix_size(struct matrix* A) {
 }
 
 void matrix_print(struct matrix* A) {
-  printf("---------------\n");
   for(unsigned i = 0; i < A->rows; i++) {
     for(unsigned j = 0; j < A->cols; j++) {
       printf("%6.4f", matrix_value(A, i, j));
@@ -322,7 +335,11 @@ double matrix_norm_L2(struct matrix* A) {
 }
 
 double* vector_element(struct matrix* v, unsigned i) {
-  return matrix_element(v, i, 0);
+  return v->data + i;
+}
+
+double vector_value(struct matrix* v, unsigned i) {
+  return *(v->data + i);
 }
 
 double vector_dot(struct matrix* a, struct matrix* b) {

@@ -68,9 +68,10 @@ double matrix_value(struct matrix* A, unsigned row, unsigned col) {
 
 struct matrix matrix_col(struct matrix* A, unsigned j) {
   assert(j < A->cols);
-  struct matrix* col = matrix_new(A->rows, 1, 0.0);
-  for(unsigned i = 0; i < A->rows; i++) {
-    *matrix_element(col, i, j) = matrix_value(A, i, j);
+  unsigned N = A->rows;
+  struct matrix* col = vector_new(N, 0.0);
+  for(unsigned i = 0; i < N; i++) {
+    *vector_element(col, i) = matrix_value(A, i, j);
   }
   return *col;
 }

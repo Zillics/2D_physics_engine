@@ -26,7 +26,6 @@ void arena_tick(struct arena* a, double dt) {
     o->collides = false;
     o->shape.color = color_green();
   }
-  /*
   for(unsigned i = 0; i < N; i++) {
     o = a->objects.objects + i;
     for(unsigned j = 0; j < N - 1; j++) {
@@ -39,7 +38,6 @@ void arena_tick(struct arena* a, double dt) {
       }
     }
   }
-  */
   a->t += dt;
 }
 

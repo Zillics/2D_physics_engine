@@ -50,13 +50,21 @@ double vector_value(struct matrix* v, unsigned i);
 double vector_norm_L2_raw(double* v, unsigned N);
 double vector_norm_L2(struct matrix* v);
 double vector_norm(struct matrix* v);
+struct matrix vector_subtract_raw(double* a, double* b, unsigned N);
 double vector_dot(struct matrix* a, struct matrix* b);
+double vector_dot_raw(double* a, double* b, unsigned N);
 /** proj_b a, or projection of vector a on vector b */
 struct matrix vector_projection(struct matrix* a, struct matrix* b);
+double vector_cross_2D(struct matrix* a, struct matrix* b);
+double vector_cross_2D_raw(double* a, double* b);
+double vector_angle_180(struct matrix* v1, struct matrix* v2);
+double vector_angle_180_raw(double* a, double* b, unsigned N);
 double vector_angle(struct matrix* v1, struct matrix* v2);
+double vector_angle_raw(double* a, double* b);
+double vector_angle_2D(struct matrix* v1, struct matrix* v2);
+double vector_angle_2D_raw(double* a, double* b);
 double vector_distance(struct matrix* v1, struct matrix* v2);
 struct matrix unit_vector(struct matrix* v);
 bool matrix_is_vector(struct matrix* v);
-double vector_angle_between(struct matrix* a, struct matrix* b);
 
 #endif

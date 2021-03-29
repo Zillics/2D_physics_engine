@@ -26,6 +26,13 @@ void polygon_delete(struct polygon* o);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);
 unsigned polygon_nVertices(struct polygon* o);
 double* polygon_vertex(struct polygon* o, unsigned i);
+/** 
+ * @param o pointer to polygon
+ * @param i1 index of edge 1
+ * @param i2 index of edge 2
+ * @return angle in radians between edge 1 and edge 2
+ * */
+double polygon_edge_angle(struct polygon* o, unsigned i1, unsigned i2);
 /** Find normal vector of vertix between point i and point i + 1. 
  * Set inward to true/false to specify whether normal points inward/outward. */
 struct matrix polygon_edge_normal(struct polygon* o, unsigned i);

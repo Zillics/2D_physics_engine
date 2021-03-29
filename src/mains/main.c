@@ -43,8 +43,13 @@ int main(int argc, char* argv[])
                           {
                             struct object *o = object_generate(10, 100.0);
                             object_place(o, event.button.x, event.button.y);
-                            double maxVel = 0.01;
-                            double maxAngVel = 1.0;
+                            if(polygon_is_convex(&o->shape)) {
+                              printf("POLYGON IS CONVEX!\n");
+                            } else {
+                              printf("POLYGON IS NOT CONVEX!\n");
+                            }
+                            double maxVel = 0.0;
+                            double maxAngVel = 0.0;
                             double min_[9] = { event.button.x, event.button.y, -maxVel, -maxVel, 0.0, 0.0, -maxAngVel, 0.0, 0.0};
                             double max_[9] = { event.button.x, event.button.y, maxVel, maxVel, 0.0, 0.0, maxAngVel, 0.0, 0.0};
                             struct matrix* min = vector_create(min_, 9);

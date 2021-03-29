@@ -144,6 +144,26 @@
   }
   END_TEST
 
+  START_TEST (test_vector_angle) {
+    // Very simple
+    double v_data[2] = { 0.0, 1.0 };
+    double u_data[2] = { 1.0, 0.0 };
+    struct matrix* v = vector_create(v_data, 2);
+    struct matrix* u = vector_create(u_data, 2);
+    ck_assert_double_eq_tol(vector_angle(v, u), M_PI / 2.0, 1e-6);
+
+    double a_data[3] = { 1.0, 0.0, 0.0};
+    double b_data[3] = { 1.0, 0.0, 0.0};
+    struct matrix* a = vector_create(a_data, 3);
+    struct matrix* b = vector_create(b_data, 3);
+    double step = 0.01 * M_PI;
+    for(double rad = 0.0; rad < 2 * M_PI; rad += step ) {
+      double angle = vector_angle(a, b);
+      ck_assert_double_eq_tol(angle, rad, 1e-6);
+      matrix_rotate_rad(a, step);
+    }
+  } END_TEST
+
 Suite* matrix_suite(void)
 {
     Suite *s;
@@ -160,6 +180,7 @@ Suite* matrix_suite(void)
     tcase_add_test(tc_core, test_cross_product);
     tcase_add_test(tc_core, test_vector_dot);
     tcase_add_test(tc_core, test_vector_projection);
+    tcase_add_test(tc_core, test_vector_angle);
     suite_add_tcase(s, tc_core);
 
     return s;

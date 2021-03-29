@@ -343,14 +343,26 @@ double vector_value(struct matrix* v, unsigned i) {
   return *(v->data + i);
 }
 
+struct matrix vector_subtract_raw(double* a, double* b, unsigned N) {
+  struct matrix* c = vector_new(N, 0.0);
+  for(unsigned i = 0; i < N; i++) {
+    *vector_element(c, i) = *(a + i) - *(b + i);
+  }
+  return *c;
+}
+
 double vector_dot(struct matrix* a, struct matrix* b) {
   assert(matrix_is_vector(a));
   assert(matrix_is_vector(b));
   unsigned N = a->rows * a->cols;
   assert(N == b->rows * b->cols);
+  return vector_dot_raw(a->data, b->data, N);
+}
+
+double vector_dot_raw(double* a, double* b, unsigned N) {
   double ret = 0.0;
   for(unsigned i = 0; i < N; i++) {
-    ret += *(a->data + i) * (*(b->data + i));
+    ret += *(a + i) * (*(b + i));
   }
   return ret;
 }
@@ -372,14 +384,49 @@ double vector_norm(struct matrix* v) {
   return vector_norm_L2(v);
 }
 
-double vector_angle(struct matrix* v1, struct matrix* v2) {
-  assert(v1->rows == 1 || v1->cols == 1);
-  assert(v2->rows == 1 || v2->cols == 1);
-  double v1norm = vector_norm_L2(v1);
-  double v2norm = vector_norm_L2(v2);
-  struct matrix v1v2 = matrix_multiply(v1, v2);
-  double angle = acos(matrix_value(&v1v2, 0, 0) / (v1norm * v2norm));
-  return angle;
+double vector_angle_180(struct matrix* a, struct matrix* b) {
+  assert(matrix_is_vector(a));
+  assert(matrix_is_vector(b));
+  unsigned N = a->rows * a->cols;
+  assert(N == b->rows * b->cols);
+  return vector_angle_180_raw(a->data, b->data, N);
+}
+
+double vector_angle_180_raw(double* a, double* b, unsigned N) {
+  double ab = vector_dot_raw(a, b, N);
+  double _ab_ = vector_norm_L2_raw(a, N) * vector_norm_L2_raw(b, N);
+  return acos(ab / (_ab_));
+}
+
+double vector_angle_2D(struct matrix* a, struct matrix* b) {
+  return vector_angle_2D_raw(a->data, b->data);  
+}
+
+double vector_angle_2D_raw(double* a, double* b) {
+  double cross = vector_cross_2D_raw(a, b);
+  if(cross <= 0.0) {
+    return vector_angle_180_raw(a, b, 2);
+  } else {
+      return 2 * M_PI - vector_angle_180_raw(a, b, 2);
+  }
+}
+
+double vector_angle(struct matrix* a, struct matrix* b) {
+  return vector_angle_2D(a, b);
+}
+
+double vector_angle_raw(double* a, double* b) {
+  return vector_angle_2D_raw(a, b);
+}
+
+double vector_cross_2D(struct matrix* a, struct matrix* b) {
+  assert(matrix_is_vector(a));
+  assert(matrix_is_vector(b));
+  return vector_cross_2D_raw(a->data, b->data);
+}
+
+double vector_cross_2D_raw(double* a, double* b) {
+  return a[0] * b[1] - a[1] * b[0];
 }
 
 struct matrix unit_vector(struct matrix* v) {

@@ -141,6 +141,26 @@ void polygon_centroid(struct polygon* o, double* x, double* y) {
   *y /= (double)N;
 }
 
+double polygon_edge_angle(struct polygon* o, unsigned i1, unsigned i2) {
+  unsigned N = polygon_nVertices(o);
+  struct matrix e1 = vector_subtract_raw(polygon_vertex(o, (i1 + 1) % N), polygon_vertex(o, i1), 2);
+  struct matrix e2 = vector_subtract_raw(polygon_vertex(o, (i2 + 1) % N), polygon_vertex(o, i2), 2);
+  return vector_angle(&e1, &e2);
+}
+
+bool polygon_is_convex(struct polygon* o) {
+  unsigned N = polygon_nVertices(o);
+  for(unsigned i1 = 0; i1 < N; i1++) {
+    unsigned i2 = (i1 + 1) % N;
+    double angle = polygon_edge_angle(o, i1, i2);
+    printf("angle: %.4f, pi: %.4f\n", angle, M_PI);
+    if(angle > M_PI) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool polygon_contains(struct polygon* o, double* p) {
   return wn_PnPoly(p, o->vertices, o->vertices.cols) != 0;
 }
@@ -175,7 +195,7 @@ void polygon_translate(struct polygon* o, double* v, double k) {
 }
 
 void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
-  SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
+  SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
   unsigned N = polygon_nVertices(o);
   for(unsigned i1 = 0; i1 < N; i1++) {
     unsigned i2 = (i1 + 1) % N;
@@ -187,6 +207,7 @@ void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
     double y1 = matrix_value(&o->edge_midpoints, 1, i1);
     double y2 = y1 + matrix_value(&o->edge_normals, 1, i1);
     SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+    SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
   }
 
 }

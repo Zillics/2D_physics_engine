@@ -330,7 +330,7 @@ double matrix_max(struct matrix* A) {
 double matrix_norm_L2(struct matrix* A) {
   double ss = 0.0;
   for(unsigned i = 0; i < A->cols; i++) {
-    ss += vector_norm_L2(matrix_col_raw(A, i), A->rows);
+    ss += vector_norm_L2_raw(matrix_col_raw(A, i), A->rows);
   }
   return ss;
 }
@@ -355,7 +355,7 @@ double vector_dot(struct matrix* a, struct matrix* b) {
   return ret;
 }
 
-double vector_norm_L2(double* v, unsigned N) {
+double vector_norm_L2_raw(double* v, unsigned N) {
   double ss = 0.0;
   for(unsigned i = 0; i < N; i++) {
     ss += pow(*(v + i), 2);
@@ -363,11 +363,20 @@ double vector_norm_L2(double* v, unsigned N) {
   return sqrt(ss);
 }
 
+double vector_norm_L2(struct matrix* v) {
+  assert(matrix_is_vector(v));
+  return vector_norm_L2_raw(v->data, v->rows * v->cols);
+}
+
+double vector_norm(struct matrix* v) {
+  return vector_norm_L2(v);
+}
+
 double vector_angle(struct matrix* v1, struct matrix* v2) {
   assert(v1->rows == 1 || v1->cols == 1);
   assert(v2->rows == 1 || v2->cols == 1);
-  double v1norm = vector_norm_L2(v1->data, 2);
-  double v2norm = vector_norm_L2(v2->data, 2);
+  double v1norm = vector_norm_L2(v1);
+  double v2norm = vector_norm_L2(v2);
   struct matrix v1v2 = matrix_multiply(v1, v2);
   double angle = acos(matrix_value(&v1v2, 0, 0) / (v1norm * v2norm));
   return angle;
@@ -376,7 +385,7 @@ double vector_angle(struct matrix* v1, struct matrix* v2) {
 struct matrix unit_vector(struct matrix* v) {
   assert(v->rows == 1 || v->cols ==1);
   unsigned N = v->rows * v->cols;
-  double norm = vector_norm_L2(v->data, N);
+  double norm = vector_norm_L2(v);
   return matrix_multiply_scalar(v, 1.0/norm);
 }
 
@@ -395,6 +404,6 @@ double vector_distance(struct matrix* v1, struct matrix* v2) {
   assert(matrix_is_vector(v1));
   assert(matrix_is_vector(v2));
   struct matrix diff = matrix_subtract(v1, v2);
-  return vector_norm_L2(diff.data, diff.rows);
+  return vector_norm_L2(&diff);
 }
 

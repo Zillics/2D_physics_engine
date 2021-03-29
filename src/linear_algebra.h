@@ -47,7 +47,9 @@ double matrix_max(struct matrix* A);
 double matrix_norm_L2(struct matrix* A);
 double* vector_element(struct matrix* v, unsigned i);
 double vector_value(struct matrix* v, unsigned i);
-double vector_norm_L2(double* v, unsigned N);
+double vector_norm_L2_raw(double* v, unsigned N);
+double vector_norm_L2(struct matrix* v);
+double vector_norm(struct matrix* v);
 double vector_dot(struct matrix* a, struct matrix* b);
 /** proj_b a, or projection of vector a on vector b */
 struct matrix vector_projection(struct matrix* a, struct matrix* b);
@@ -55,5 +57,6 @@ double vector_angle(struct matrix* v1, struct matrix* v2);
 double vector_distance(struct matrix* v1, struct matrix* v2);
 struct matrix unit_vector(struct matrix* v);
 bool matrix_is_vector(struct matrix* v);
+double vector_angle_between(struct matrix* a, struct matrix* b);
 
 #endif

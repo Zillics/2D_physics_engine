@@ -240,13 +240,13 @@ double polygon_moment_of_inertia(struct polygon* o, double ro) {
 
     // Find out w1, h1
     struct matrix v14 = matrix_subtract(&p4, p1);
-    double w1 = vector_norm_L2(v14.data, 2);
+    double w1 = vector_norm_L2_raw(v14.data, 2);
     struct matrix v43 = matrix_subtract(p3, &p4);
-    double h1 = vector_norm_L2(v43.data, 2);
+    double h1 = vector_norm_L2_raw(v43.data, 2);
 
     // Find out w2, h2
     struct matrix v42 = matrix_subtract(p2, &p4);
-    double w2 = vector_norm_L2(v42.data, 2);
+    double w2 = vector_norm_L2_raw(v42.data, 2);
     double h2 = h1;
 
     // Moment of inertia of triangle1 around p3

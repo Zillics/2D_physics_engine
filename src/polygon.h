@@ -39,12 +39,12 @@ void polygon_rotate(struct polygon* o, double deg);
 void polygon_translate(struct polygon* o, double* v, double k);
 void polygon_rotate_rad(struct polygon* o, double rad);
 void polygon_rotate_deg(struct polygon* o, double deg);
+bool polygon_is_convex(struct polygon* o);
 /** Given polygon, populate n and c with normal and center of all vertices.
  * Set inward to true/false for normals pointing inwards/outwards. */
 void polygon_vertex_normals(struct polygon* o, bool inward, struct matrix* n, struct matrix* c);
 void polygon_print(struct polygon* o);
 bool polygons_collide(struct polygon* o1, struct polygon* o2);
-bool polygons_collide_N(unsigned N, struct polygon polygons[N]);
 double polygon_area(struct polygon* o);
 /** Compute polygon moment of inertia, given density ro. */
 double polygon_moment_of_inertia(struct polygon* o, double ro);

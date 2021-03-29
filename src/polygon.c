@@ -152,8 +152,7 @@ bool polygon_is_convex(struct polygon* o) {
   unsigned N = polygon_nVertices(o);
   for(unsigned i1 = 0; i1 < N; i1++) {
     unsigned i2 = (i1 + 1) % N;
-    double angle = polygon_edge_angle(o, i1, i2);
-    printf("angle: %.4f, pi: %.4f\n", angle, M_PI);
+    double angle = polygon_edge_angle(o, i2, i1);
     if(angle > M_PI) {
       return false;
     }

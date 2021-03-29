@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
                         switch(event.button.button) {
                           case SDL_BUTTON_LEFT:
                           {
-                            struct object *o = object_generate(10, 100.0);
+                            struct object *o = object_generate(7, 100.0);
                             object_place(o, event.button.x, event.button.y);
                             if(polygon_is_convex(&o->shape)) {
                               printf("POLYGON IS CONVEX!\n");

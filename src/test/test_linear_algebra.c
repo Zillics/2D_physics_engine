@@ -164,6 +164,19 @@
     }
   } END_TEST
 
+  START_TEST (test_determinant) {
+    double A2_data[2][2] = { {1.41, 4.63},
+                             {2.531, -5.34} };
+    struct matrix* A2 = matrix_create(2, 2, A2_data);
+    ck_assert_double_eq_tol(matrix_determinant_2D(A2), -19.24793, 1e-6);
+
+    double A3_data[3][3] = { {1, 2, 3},
+                             {3, 2, 1},
+                             {2, 1, 3} };
+    struct matrix* A3 = matrix_create(3, 3, A3_data);
+    ck_assert_double_eq_tol(matrix_determinant_3D(A3), -12.0, 1e-6);
+  } END_TEST
+
 Suite* matrix_suite(void)
 {
     Suite *s;
@@ -181,6 +194,7 @@ Suite* matrix_suite(void)
     tcase_add_test(tc_core, test_vector_dot);
     tcase_add_test(tc_core, test_vector_projection);
     tcase_add_test(tc_core, test_vector_angle);
+    tcase_add_test(tc_core, test_determinant);
     suite_add_tcase(s, tc_core);
 
     return s;

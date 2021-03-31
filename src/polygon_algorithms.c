@@ -62,7 +62,7 @@ bool is_an_ear(struct polygon* o, int i2) {
   for(unsigned i = 0; i < N - 3; i++) {
     unsigned idx = i % N; 
     if(wn_PnPoly(polygon_vertex(o, idx), triangle, o->vertices.cols)) {
-      return false;
+    return false;
     }
   }
   return true;

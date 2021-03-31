@@ -27,6 +27,10 @@ void matrix_rotate(struct matrix* A, double deg);
 void matrix_rotate_deg(struct matrix* A, double rad);
 void matrix_rotate_rad(struct matrix* A, double rad);
 void matrix_reset(struct matrix* A, double val);
+double matrix_determinant_2D_raw(double* c1, double* c2);
+double matrix_determinant_3D_raw(double* c1, double* c2, double* c3);
+double matrix_determinant_2D(struct matrix* A);
+double matrix_determinant_3D(struct matrix* A);
 struct matrix matrix_transpose(struct matrix* A);
 struct matrix matrix_negative(struct matrix* A);
 struct matrix matrix_multiply(struct matrix* A, struct matrix* B); 
@@ -65,7 +69,16 @@ double vector_angle_raw(double* a, double* b);
 double vector_angle_2D(struct matrix* v1, struct matrix* v2);
 double vector_angle_2D_raw(double* a, double* b);
 double vector_distance(struct matrix* v1, struct matrix* v2);
+bool vectors_counter_clockwise_2D_raw(double* a, double* b, double* c);
 struct matrix unit_vector(struct matrix* v);
 bool matrix_is_vector(struct matrix* v);
 
+/** Determine whether two 2D lines intersect
+ * @param a1
+ * @param a2
+ * @param b1
+ * @param b2
+ * @return true if line_a (a1->a2) and line_b (b1->b2) intersect, false otherwise 
+ * */
+bool lines_intersect_2D_raw(double* a1, double* a2, double* b1, double* b2);
 #endif

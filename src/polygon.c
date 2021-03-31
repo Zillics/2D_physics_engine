@@ -22,6 +22,7 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
     *matrix_element(&o->vertices, 1, i) = vertices[i][1];
     *matrix_element(&o->vertices, 2, i) = 1.0; // 1.0 for making vertices homogenous
   }
+  assert(vertices_clockwise(&o->vertices));
   bool inward = false;
   polygon_recompute_edge_normals(o, inward);
   struct matrix n;
@@ -176,6 +177,50 @@ bool polygon_is_convex(struct polygon* o) {
   return true;
 }
 
+bool polygon_self_intersects(struct polygon* o) {
+  printf("INTERSECTS?\n");
+  return vertices_intersect(&o->vertices);
+}
+
+bool vertices_intersect(struct matrix* verts) {
+  // TODO: something faster than O(n^2)
+  unsigned N = verts->cols;
+  for(unsigned i1 = 0; i1 < N; i1++) {
+    double* a1 = matrix_col_raw(verts, i1);
+    double* a2 = matrix_col_raw(verts, (i1 + 1) % N);
+    for(unsigned i2 = 0; i2 < N - 1; i2++) {
+      unsigned iEdge2 = (i1 + 1 + i2) % N;
+      double* b1 = matrix_col_raw(verts, (i1 + 1 + i2) % N);
+      double* b2 = matrix_col_raw(verts, (i1 + 1 + i2 + 1) % N);
+      printf("i1*i2: %d\n", i1*i2);
+      if(lines_intersect_2D_raw(a1, a2, b1, b2)) {
+        return true;
+      }
+    }
+  }
+  printf("zzzzzzzzzzzzzzzintersect done\n");
+  return false;
+
+}
+
+bool vertices_clockwise(struct matrix* verts) {
+  // TODO: understand why this works
+  // stole the solution from: https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order#:~:text=If%20the%20determinant%20is%20negative,q%20and%20r%20are%20collinear.
+  double sum = 0.0;
+  unsigned N = verts->cols;
+  for(unsigned i1 = 0; i1 < N; i1++) {
+    unsigned i2 = (i1 + 1) % N;
+    double *p1 = matrix_col_raw(verts, i1);
+    double *p2 = matrix_col_raw(verts, i2);
+    sum += (p2[0] - p1[0]) * (p2[1] + p2[0]);
+  }
+  if(sum < 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 bool polygon_contains(struct polygon* o, double* p) {
   return wn_PnPoly(p, &o->vertices, o->vertices.cols) != 0;
 }
@@ -210,7 +255,7 @@ void polygon_translate(struct polygon* o, double* v, double k) {
 }
 
 void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
-  SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+  SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
   unsigned N = polygon_nVertices(o);
   for(unsigned i1 = 0; i1 < N; i1++) {
     unsigned i2 = (i1 + 1) % N;
@@ -222,7 +267,6 @@ void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
     double y1 = matrix_value(&o->edge_midpoints, 1, i1);
     double y2 = y1 + matrix_value(&o->edge_normals, 1, i1);
     SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
-    SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
   }
 
 }

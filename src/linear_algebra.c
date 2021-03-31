@@ -22,13 +22,13 @@ void matrix_delete(struct matrix* A) {
 struct matrix* matrix_create(unsigned rows, unsigned cols, double data[cols][rows]) {
   struct matrix* A = malloc(sizeof(struct matrix));
   A->data = malloc(rows * cols * sizeof(double));
+  A->rows = rows;
+  A->cols = cols;
   for(unsigned i = 0; i < rows; i++) {
     for(unsigned j = 0; j < cols; j++) {
       *matrix_element(A, i, j) = data[j][i];
     }
   }
-  A->rows = rows;
-  A->cols = cols;
   return A;
 }
 
@@ -139,6 +139,23 @@ struct matrix translation_matrix_2D(double x, double y) {
   *matrix_element(&I, 0, 2) = x;
   *matrix_element(&I, 1, 2) = y;
   return I;
+}
+
+double matrix_determinant_3D_raw(double* c1, double* c2, double* c3) {
+  return c1[0] * c2[1] * c3[2] + c2[0] * c3[1] * c1[2] + c3[0] * c1[1] * c2[2]
+        -(c3[0] * c2[1] * c1[2]) -(c2[0] * c1[1] * c3[2]) -(c1[0] * c3[1] * c2[2]);
+}
+
+double matrix_determinant_2D_raw(double* c1, double* c2) {
+  return c1[0] * c2[1] - (c2[0] * c1[1]);
+}
+
+double matrix_determinant_2D(struct matrix* A) {
+  return matrix_determinant_2D_raw(matrix_col_raw(A, 0), matrix_col_raw(A, 1));
+}
+
+double matrix_determinant_3D(struct matrix* A) {
+  return matrix_determinant_3D_raw(matrix_col_raw(A, 0), matrix_col_raw(A, 1), matrix_col_raw(A, 2));
 }
 
 struct matrix matrix_transpose(struct matrix* A) {
@@ -466,4 +483,24 @@ double vector_distance(struct matrix* v1, struct matrix* v2) {
   struct matrix diff = matrix_subtract(v1, v2);
   return vector_norm_L2(&diff);
 }
+
+bool vectors_counter_clockwise_2D_raw(double* a, double* b, double* c) {
+  double a_[3] = { a[0], a[1], 1.0 };
+  double b_[3] = { b[0], b[1], 1.0 };
+  double c_[3] = { c[0], c[1], 1.0 };
+  return matrix_determinant_3D_raw(a_, b_, c_) > 0;
+}
+
+bool lines_intersect_2D_raw(double* a1, double* a2, double* b1, double* b2) {
+  printf("a1: (%.4f, %.4f), a2: (%.4f, %.4f), b1: (%.4f, %.4f), b2: (%.4f, %.4f)\n", a1[0], a1[1], a2[0], a2[1], b1[0], b1[1], b2[0], b2[1]);
+  if(vectors_counter_clockwise_2D_raw(a1, a2, b1) == vectors_counter_clockwise_2D_raw(a1, a2, b2)) {
+    return false;
+  }
+  if(vectors_counter_clockwise_2D_raw(b1, b2, a1) == vectors_counter_clockwise_2D_raw(b1, b2, a2)) {
+    return false;
+  }
+  printf("intersects!\n");
+  return true;
+}
+
 

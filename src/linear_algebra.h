@@ -12,6 +12,7 @@ struct matrix {
 
 struct matrix* matrix_new(unsigned rows, unsigned cols, double initVal);
 struct matrix* vector_new(unsigned N, double initVal);
+struct matrix* matrix_create(unsigned rows, unsigned cols, double data[cols][rows]);
 struct matrix* vector_create(double* data, unsigned N);
 struct matrix* vector_generate(struct matrix* min, struct matrix* max);
 void matrix_delete(struct matrix* A);

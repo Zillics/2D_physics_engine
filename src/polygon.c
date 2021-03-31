@@ -41,6 +41,16 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
   return o;
 }
 
+struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsigned* vertex_idx) {
+  double vertices[nVertices][2];
+  for(unsigned i = 0; i < nVertices; i++) {
+    unsigned vi = vertex_idx[i];
+    vertices[i][0] = polygon_vertex(o, vi)[0];
+    vertices[i][1] = polygon_vertex(o, vi)[1];
+  }
+  return polygon_new(nVertices, vertices, o->color);
+}
+
 struct polygon* polygon_generate(unsigned N, double r) {
   double vertices[N][2];
   double direction[3] = {0.0, r, 1.0};
@@ -54,7 +64,7 @@ struct polygon* polygon_generate(unsigned N, double r) {
     // 1. Rotate line s.t its angle is rads[i]
     double rad = rads[i] - prev_rad;
     prev_rad = rads[i];
-    struct matrix R = rotation_matrix_2D(rad);
+    struct matrix R = rotation_matrix_2D(-rad);
     *dir = matrix_multiply(&R, dir);
     // 2. Generate a random point somewhere on line
     double k = random_double(0.2, 1.0);
@@ -141,6 +151,12 @@ void polygon_centroid(struct polygon* o, double* x, double* y) {
   *y /= (double)N;
 }
 
+struct matrix polygon_edge(struct polygon* o, unsigned i1) {
+  unsigned N = polygon_nVertices(o);
+  unsigned i2 = (i1 + 1) % N;
+  return vector_subtract_raw(polygon_vertex(o, i2), polygon_vertex(o, i1), 3);
+}
+
 double polygon_edge_angle(struct polygon* o, unsigned i1, unsigned i2) {
   unsigned N = polygon_nVertices(o);
   struct matrix e1 = vector_subtract_raw(polygon_vertex(o, (i1 + 1) % N), polygon_vertex(o, i1), 2);
@@ -161,7 +177,7 @@ bool polygon_is_convex(struct polygon* o) {
 }
 
 bool polygon_contains(struct polygon* o, double* p) {
-  return wn_PnPoly(p, o->vertices, o->vertices.cols) != 0;
+  return wn_PnPoly(p, &o->vertices, o->vertices.cols) != 0;
 }
 
 void polygon_rotate(struct polygon* o, double deg) {

@@ -1,4 +1,5 @@
 #include "polygon_algorithms.h"
+#include "winding_number_algorithm.h"
 
 bool polygon_axes_overlap(struct polygon* o1, struct polygon* o2) {
     for(unsigned axis = 0; axis < polygon_nVertices(o1); axis++) {
@@ -26,4 +27,43 @@ bool separated_axis_theorem(struct polygon* o1, struct polygon* o2) {
   bool overlap1 = polygon_axes_overlap(o1, o2);
   bool overlap2 = polygon_axes_overlap(o2, o1);
   return overlap1 && overlap2;
+}
+
+
+
+void ear_clipping(struct polygon* o, struct polygon* ears) {
+  unsigned N = polygon_nVertices(o);
+  unsigned iEar = 0;
+  unsigned remainingVertices = N;
+  for(unsigned i = 0; i < remainingVertices; i++) {
+    if(is_an_ear(o, i)) {
+      unsigned vertix_idx[3] = { (i - 1) % N, i, (i + 1) % N };
+      struct polygon* triangle = polygon_create_sub(o, 3, vertix_idx);
+      ears[iEar] = *triangle;
+      iEar += 1;
+    }
+  }
+}
+
+bool is_an_ear(struct polygon* o, int i2) {
+  unsigned N = polygon_nVertices(o);
+  int i1 = (i2-1) % N;
+  int i3 = (i2+1) % N;
+  // 1. Is angle between edge i-1 and i convex?
+  if(polygon_edge_angle(o, i1, i2) > M_PI) {
+    return false;
+  }
+  double points[3][2] =   { {polygon_vertex(o, i1)[0], polygon_vertex(o, i1)[1]},
+                            {polygon_vertex(o, i2)[0], polygon_vertex(o, i2)[1]},
+                            {polygon_vertex(o, i3)[0], polygon_vertex(o, i3)[1]}
+                          };
+  struct matrix* triangle = matrix_create(2, 3, points);
+  // 2. Does triangle contain any of the polygon vertices?
+  for(unsigned i = 0; i < N - 3; i++) {
+    unsigned idx = i % N; 
+    if(wn_PnPoly(polygon_vertex(o, idx), triangle, o->vertices.cols)) {
+      return false;
+    }
+  }
+  return true;
 }

@@ -19,6 +19,19 @@ void matrix_delete(struct matrix* A) {
   free(A->data);
 }
 
+struct matrix* matrix_create(unsigned rows, unsigned cols, double data[cols][rows]) {
+  struct matrix* A = malloc(sizeof(struct matrix));
+  A->data = malloc(rows * cols * sizeof(double));
+  for(unsigned i = 0; i < rows; i++) {
+    for(unsigned j = 0; j < cols; j++) {
+      *matrix_element(A, i, j) = data[j][i];
+    }
+  }
+  A->rows = rows;
+  A->cols = cols;
+  return A;
+}
+
 struct matrix* vector_new(unsigned N, double initVal) {
   return matrix_new(N, 1, initVal);
 }

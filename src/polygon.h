@@ -7,6 +7,7 @@
 #include "color.h"
 #include "linear_algebra.h"
 
+/** Polygon with clock-wise ordered vertices. */
 struct polygon {
   struct matrix vertices;
   struct matrix edge_midpoints;
@@ -19,6 +20,7 @@ struct polygon {
 
 struct polygon* new_square(int x, int y, unsigned width, struct color color);
 struct polygon* polygon_new(unsigned nVertices, double vertices[2][nVertices], struct color color);
+struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsigned* vertix_idx);
 /** Randomly generate a simple polygon of N vertices. */
 struct polygon* polygon_generate(unsigned N, double r);
 size_t polygon_size(struct polygon* o);
@@ -26,6 +28,7 @@ void polygon_delete(struct polygon* o);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);
 unsigned polygon_nVertices(struct polygon* o);
 double* polygon_vertex(struct polygon* o, unsigned i);
+struct matrix polygon_edge(struct polygon* o, unsigned i);
 /** 
  * @param o pointer to polygon
  * @param i1 index of edge 1

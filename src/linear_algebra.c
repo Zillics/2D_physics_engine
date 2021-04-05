@@ -484,13 +484,31 @@ double vector_distance(struct matrix* v1, struct matrix* v2) {
   return vector_norm_L2(&diff);
 }
 
-bool vectors_counter_clockwise_2D_raw(double* a, double* b, double* c) {
-  double a_[3] = { a[0], a[1], 1.0 };
-  double b_[3] = { b[0], b[1], 1.0 };
-  double c_[3] = { c[0], c[1], 1.0 };
-  return matrix_determinant_3D_raw(a_, b_, c_) > 0;
+int vectors_orientation_raw(double* a, double* b, double* c) {
+  double tol = 1e-6;
+  double val = (b[1] - a[1]) * (c[0] - b[0]) - (c[1] - b[1]) * (b[0] - a[0]);
+  // counter-clockwise
+  if(val < -tol) {
+    return -1;
+  }
+  // clockwise
+  if(val > tol) {
+    return 1;
+  }
+  // colinear
+  return 0;
 }
 
+bool vector_lies_between(double* a, double* b, double* c) {
+  return (b[0] < fmax(a[0], c[0])) && (b[0] > fmin(a[0], c[0]))
+      && (b[1] < fmax(a[1], c[1])) && (b[1] > fmin(a[1], c[1]));
+}
+
+bool vectors_counter_clockwise_2D_raw(double* a, double* b, double* c) {
+  return vectors_orientation_raw(a, b, c) < 0;
+}
+
+/*
 bool lines_intersect_2D_raw(double* a1, double* a2, double* b1, double* b2) {
   printf("a1: (%.4f, %.4f), a2: (%.4f, %.4f), b1: (%.4f, %.4f), b2: (%.4f, %.4f)\n", a1[0], a1[1], a2[0], a2[1], b1[0], b1[1], b2[0], b2[1]);
   if(vectors_counter_clockwise_2D_raw(a1, a2, b1) == vectors_counter_clockwise_2D_raw(a1, a2, b2)) {
@@ -499,8 +517,72 @@ bool lines_intersect_2D_raw(double* a1, double* a2, double* b1, double* b2) {
   if(vectors_counter_clockwise_2D_raw(b1, b2, a1) == vectors_counter_clockwise_2D_raw(b1, b2, a2)) {
     return false;
   }
-  printf("intersects!\n");
   return true;
 }
 
+*/
 
+void line_cut_end(double* p1, double* p2, unsigned N, double x) {
+  for(unsigned i = 0; i < N; i++) {
+    double dir;
+    if(p2[i] - p1[i] > 0) {
+      dir = 1.0;
+    } else {
+      dir = -1.0;
+    }
+    p1[i] += dir * x;
+    p2[i] -= dir * x;
+  }
+}
+
+// The main function that returns true if line segment 'p1q1'
+// and 'p2q2' intersect.
+bool lines_intersect_2D_raw(double* a1_, double* a2_, double* b1_, double* b2_)
+{
+  double a1[2] = { a1_[0], a1_[1] };
+  double a2[2] = { a2_[0], a2_[1] };
+  double b1[2] = { b1_[0], b1_[1] };
+  double b2[2] = { b2_[0], b2_[1] };
+  line_cut_end(a1, a2, 2, 1e-6);
+  line_cut_end(b1, b2, 2, 1e-6);
+  printf("a1: (%.4f, %.4f), a2: (%.4f, %.4f), b1: (%.4f, %.4f), b2: (%.4f, %.4f)\n", a1[0], a1[1], a2[0], a2[1], b1[0], b1[1], b2[0], b2[1]);
+  // Find the four orientations needed for general and
+  // special cases
+  int o1 = vectors_orientation_raw(a1, a2, b1);
+  int o2 = vectors_orientation_raw(a1, a2, b2);
+  int o3 = vectors_orientation_raw(b1, b2, a1);
+  int o4 = vectors_orientation_raw(b1, b2, a2);
+
+  // General case
+  if (o1 != o2 && o3 != o4) {
+  printf("A\n");
+  return true;
+  }
+
+  // Special Cases§
+  // p1, q1 and p2 are colinear and p2 lies on segment p1q1
+  if (o1 == 0 && vector_lies_between(a1, b1, a2)) {
+  printf("B\n");
+  return true;
+  }
+
+  // p1, q1 and q2 are colinear and q2 lies on segment p1q1
+  if (o2 == 0 && vector_lies_between(a1, b2, a2)) {
+  printf("C\n");
+  return true;
+  }
+
+  // p2, q2 and p1 are colinear and p1 lies on segment p2q2
+  if (o3 == 0 && vector_lies_between(b1, a1, b2)) {
+  printf("D\n");
+  return true;
+  }
+
+  // p2, q2 and q1 are colinear and q1 lies on segment p2q2
+  if (o4 == 0 && vector_lies_between(b1, a2, b2)) {
+  printf("E\n");
+  return true;
+  }
+
+  return false; // Doesn't fall in any of the above cases
+}

@@ -24,12 +24,13 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 # Add a prefix to INC_DIRS. So moduleA would become -ImoduleA. GCC understands this -I flag
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-CFLAGS := $(shell sdl2-config --cflags)
+CFLAGS := $(shell sdl2-config --cflags) $(shell pkg-config --cflags check)
 
-LDFLAGS := $(shell sdl2-config --libs) -lm -lcheck
+LDFLAGS := $(shell sdl2-config --libs) $(shell pkg-config --libs check) -lm
 
 .PHONY: all
 all: $(EXECUTABLES)
+
 
 .PHONY: test
 test: $(TEST_EXECS)

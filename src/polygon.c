@@ -39,6 +39,7 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
   polygon_centroid(o, vector_element(c, 0), vector_element(c, 1));
   o->centroid = *c;
   o->area = polygon_area(o);
+  matrix_print(&o->vertices);
   return o;
 }
 
@@ -88,6 +89,12 @@ unsigned polygon_nVertices(struct polygon* o) {
 }
 double* polygon_vertex(struct polygon* o, unsigned i) {
   return o->vertices.data + i * o->vertices.rows;
+}
+
+void polygon_edge_raw(struct polygon* o, unsigned i, double* p1, double* p2) {
+  unsigned N = polygon_nVertices(o);
+  p1 = polygon_vertex(o, i);
+  p2 = polygon_vertex(o, (i + 1) % N);
 }
 
 struct matrix polygon_edge_normal(struct polygon* o, unsigned i) {
@@ -177,28 +184,31 @@ bool polygon_is_convex(struct polygon* o) {
   return true;
 }
 
-bool polygon_self_intersects(struct polygon* o) {
+bool polygon_self_intersects(struct polygon* o, unsigned* ia1, unsigned* ia2, unsigned* ib1, unsigned* ib2) {
   printf("INTERSECTS?\n");
-  return vertices_intersect(&o->vertices);
+  return vertices_intersect(&o->vertices, ia1, ia2, ib1, ib2);
 }
 
-bool vertices_intersect(struct matrix* verts) {
+bool vertices_intersect(struct matrix* verts, unsigned* ia1, unsigned* ia2, unsigned* ib1, unsigned* ib2) {
   // TODO: something faster than O(n^2)
+  printf("...............\n");
   unsigned N = verts->cols;
   for(unsigned i1 = 0; i1 < N; i1++) {
-    double* a1 = matrix_col_raw(verts, i1);
-    double* a2 = matrix_col_raw(verts, (i1 + 1) % N);
+    *ia1 = i1;
+    *ia2 = (i1 + 1) % N;
+    double* a1 = matrix_col_raw(verts, *ia1);
+    double* a2 = matrix_col_raw(verts, *ia2);
     for(unsigned i2 = 0; i2 < N - 1; i2++) {
-      unsigned iEdge2 = (i1 + 1 + i2) % N;
-      double* b1 = matrix_col_raw(verts, (i1 + 1 + i2) % N);
-      double* b2 = matrix_col_raw(verts, (i1 + 1 + i2 + 1) % N);
-      printf("i1*i2: %d\n", i1*i2);
+      *ib1 = (i1 + 1 + i2) % N;
+      *ib2 = (i1 + 1 + i2 + 1) % N;
+      double* b1 = matrix_col_raw(verts, *ib1);
+      double* b2 = matrix_col_raw(verts, *ib2);
+      printf("%d->%d | %d->%d, N: %d\n", *ia1, *ia2, *ib1, *ib2, N);
       if(lines_intersect_2D_raw(a1, a2, b1, b2)) {
         return true;
       }
     }
   }
-  printf("zzzzzzzzzzzzzzzintersect done\n");
   return false;
 
 }
@@ -212,7 +222,7 @@ bool vertices_clockwise(struct matrix* verts) {
     unsigned i2 = (i1 + 1) % N;
     double *p1 = matrix_col_raw(verts, i1);
     double *p2 = matrix_col_raw(verts, i2);
-    sum += (p2[0] - p1[0]) * (p2[1] + p2[0]);
+    sum += (p2[0] - p1[0]) * (p2[1] + p1[1]);
   }
   if(sum < 0) {
     return false;
@@ -260,7 +270,7 @@ void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
   for(unsigned i1 = 0; i1 < N; i1++) {
     unsigned i2 = (i1 + 1) % N;
     // Vertix
-    SDL_RenderDrawLine(renderer, polygon_vertex(o, i1)[0], polygon_vertex(o, i1)[1], polygon_vertex(o, i2)[0], polygon_vertex(o, i2)[1]);
+    polygon_render_vertex(o, renderer, i1);
     // Normal
     double x1 = matrix_value(&o->edge_midpoints, 0, i1);
     double x2 = x1 + matrix_value(&o->edge_normals, 0, i1);
@@ -269,6 +279,13 @@ void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
     SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
   }
 
+}
+
+void polygon_render_vertex(struct polygon* o, SDL_Renderer* renderer, unsigned i1) {
+  unsigned N = polygon_nVertices(o);
+  SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
+  unsigned i2 = (i1 + 1) % N;
+  SDL_RenderDrawLine(renderer, polygon_vertex(o, i1)[0], polygon_vertex(o, i1)[1], polygon_vertex(o, i2)[0], polygon_vertex(o, i2)[1]);
 }
 
 size_t polygon_size(struct polygon* o) {

@@ -27,8 +27,10 @@ struct polygon* polygon_generate(unsigned N, double r);
 size_t polygon_size(struct polygon* o);
 void polygon_delete(struct polygon* o);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);
+void polygon_render_vertex(struct polygon* o, SDL_Renderer* renderer, unsigned i1);
 unsigned polygon_nVertices(struct polygon* o);
 double* polygon_vertex(struct polygon* o, unsigned i);
+void polygon_edge_raw(struct polygon* o, unsigned i, double* p1, double* p2);
 struct matrix polygon_edge(struct polygon* o, unsigned i);
 /** 
  * @param o pointer to polygon
@@ -51,8 +53,8 @@ void polygon_translate(struct polygon* o, double* v, double k);
 void polygon_rotate_rad(struct polygon* o, double rad);
 void polygon_rotate_deg(struct polygon* o, double deg);
 bool polygon_is_convex(struct polygon* o);
-bool polygon_self_intersects(struct polygon* o);
-bool vertices_intersect(struct matrix* verts);
+bool polygon_self_intersects(struct polygon* o, unsigned* ia1, unsigned* ia2, unsigned* ib1, unsigned* ib2);
+bool vertices_intersect(struct matrix* verts, unsigned* ia1, unsigned* ia2, unsigned* ib1, unsigned* ib2);
 bool vertices_clockwise(struct matrix* verts);
 /** Given polygon, populate n and c with normal and center of all vertices.
  * Set inward to true/false for normals pointing inwards/outwards. */

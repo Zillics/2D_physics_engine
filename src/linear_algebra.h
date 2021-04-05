@@ -69,6 +69,8 @@ double vector_angle_raw(double* a, double* b);
 double vector_angle_2D(struct matrix* v1, struct matrix* v2);
 double vector_angle_2D_raw(double* a, double* b);
 double vector_distance(struct matrix* v1, struct matrix* v2);
+bool vector_lies_between(double* a, double* b, double* c);
+int vector_orientation_raw(double* a, double* b, double* c);
 bool vectors_counter_clockwise_2D_raw(double* a, double* b, double* c);
 struct matrix unit_vector(struct matrix* v);
 bool matrix_is_vector(struct matrix* v);
@@ -81,4 +83,5 @@ bool matrix_is_vector(struct matrix* v);
  * @return true if line_a (a1->a2) and line_b (b1->b2) intersect, false otherwise 
  * */
 bool lines_intersect_2D_raw(double* a1, double* a2, double* b1, double* b2);
+void line_cut_end(double* p1, double* p2, unsigned N, double x);
 #endif

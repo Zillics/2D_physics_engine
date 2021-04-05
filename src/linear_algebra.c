@@ -543,8 +543,8 @@ bool lines_intersect_2D_raw(double* a1_, double* a2_, double* b1_, double* b2_)
   double a2[2] = { a2_[0], a2_[1] };
   double b1[2] = { b1_[0], b1_[1] };
   double b2[2] = { b2_[0], b2_[1] };
-  line_cut_end(a1, a2, 2, 1e-6);
-  line_cut_end(b1, b2, 2, 1e-6);
+  line_cut_end(a1, a2, 2, 1e-4);
+  line_cut_end(b1, b2, 2, 1e-4);
   printf("a1: (%.4f, %.4f), a2: (%.4f, %.4f), b1: (%.4f, %.4f), b2: (%.4f, %.4f)\n", a1[0], a1[1], a2[0], a2[1], b1[0], b1[1], b2[0], b2[1]);
   // Find the four orientations needed for general and
   // special cases

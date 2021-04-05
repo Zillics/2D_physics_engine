@@ -184,26 +184,25 @@ bool polygon_is_convex(struct polygon* o) {
   return true;
 }
 
-bool polygon_self_intersects(struct polygon* o, unsigned* ia1, unsigned* ia2, unsigned* ib1, unsigned* ib2) {
-  printf("INTERSECTS?\n");
-  return vertices_intersect(&o->vertices, ia1, ia2, ib1, ib2);
+bool polygon_self_intersects(struct polygon* o) {
+  return vertices_intersect(&o->vertices);
 }
 
-bool vertices_intersect(struct matrix* verts, unsigned* ia1, unsigned* ia2, unsigned* ib1, unsigned* ib2) {
+bool vertices_intersect(struct matrix* verts) {
   // TODO: something faster than O(n^2)
   printf("...............\n");
   unsigned N = verts->cols;
   for(unsigned i1 = 0; i1 < N; i1++) {
-    *ia1 = i1;
-    *ia2 = (i1 + 1) % N;
-    double* a1 = matrix_col_raw(verts, *ia1);
-    double* a2 = matrix_col_raw(verts, *ia2);
-    for(unsigned i2 = 0; i2 < N - 1; i2++) {
-      *ib1 = (i1 + 1 + i2) % N;
-      *ib2 = (i1 + 1 + i2 + 1) % N;
-      double* b1 = matrix_col_raw(verts, *ib1);
-      double* b2 = matrix_col_raw(verts, *ib2);
-      printf("%d->%d | %d->%d, N: %d\n", *ia1, *ia2, *ib1, *ib2, N);
+    unsigned ia1 = i1;
+    unsigned ia2 = (i1 + 1) % N;
+    double* a1 = matrix_col_raw(verts, ia1);
+    double* a2 = matrix_col_raw(verts, ia2);
+    for(unsigned i2 = 0; i2 < N - 3; i2++) {
+      unsigned ib1 = (i1 + 2 + i2) % N;
+      unsigned ib2 = (i1 + 2 + i2 + 1) % N;
+      double* b1 = matrix_col_raw(verts, ib1);
+      double* b2 = matrix_col_raw(verts, ib2);
+      printf("%d->%d | %d->%d, N: %d\n", ia1, ia2, ib1, ib2, N);
       if(lines_intersect_2D_raw(a1, a2, b1, b2)) {
         return true;
       }

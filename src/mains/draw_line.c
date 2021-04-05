@@ -40,14 +40,15 @@ int main(int argc, char* argv[])
                 // Render background
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
                 SDL_RenderClear(renderer);
-                if(o) {
-                  polygon_render(o, renderer);
-                }
                 if(drawing) {
                   for(unsigned i = 0; i < nVertices; i++) {
                     SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-                    SDL_RenderDrawPoint(renderer, vertices[i][0], vertices[i][1]);
+                    SDL_RenderDrawPoint(renderer, vertices[i][0], vertices[i][1]);  
                   }
+                } else {
+                  SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+                  SDL_RenderDrawLine(renderer, vertices[0][0], vertices[0][1], vertices[1][0], vertices[1][1]);
+                  SDL_RenderDrawLine(renderer, vertices[2][0], vertices[2][1], vertices[3][0], vertices[3][1]);
                 }
                 // Display all rendered stuff
                 SDL_RenderPresent(renderer);
@@ -66,20 +67,17 @@ int main(int argc, char* argv[])
                             break;
                           case SDL_BUTTON_RIGHT:
                           {
-                            if(nVertices >= 3) {
-                              if(o) {
-                                polygon_delete(o);
-                              }
-                              struct polygon* temp = polygon_new(nVertices, vertices, color);
-                              if(polygon_self_intersects(temp)) { 
-                                printf("Polygon self intersects -> not simple! Only simple polygons accepted\n");
-                                o = NULL;
+                            if(nVertices >= 4) {
+                              drawing = false;
+                              nVertices = 0;
+                              struct matrix* temp = matrix_create(2, 4, vertices);
+                              if(lines_intersect_2D_raw(matrix_col_raw(temp, 0), matrix_col_raw(temp, 1), matrix_col_raw(temp, 2), matrix_col_raw(temp, 3))) {
+                                printf("Lines intersect!\n");
                               } else {
-                                o = temp;
+                                printf("Lines do not intersect!\n");
                               }
+                              matrix_delete(temp);
                             }
-                            nVertices = 0;
-                            drawing = false;
                             break;
                           }
                           break;

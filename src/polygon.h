@@ -53,8 +53,8 @@ void polygon_translate(struct polygon* o, double* v, double k);
 void polygon_rotate_rad(struct polygon* o, double rad);
 void polygon_rotate_deg(struct polygon* o, double deg);
 bool polygon_is_convex(struct polygon* o);
-bool polygon_self_intersects(struct polygon* o, unsigned* ia1, unsigned* ia2, unsigned* ib1, unsigned* ib2);
-bool vertices_intersect(struct matrix* verts, unsigned* ia1, unsigned* ia2, unsigned* ib1, unsigned* ib2);
+bool polygon_self_intersects(struct polygon* o);
+bool vertices_intersect(struct matrix* verts); 
 bool vertices_clockwise(struct matrix* verts);
 /** Given polygon, populate n and c with normal and center of all vertices.
  * Set inward to true/false for normals pointing inwards/outwards. */

@@ -39,7 +39,6 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
   polygon_centroid(o, vector_element(c, 0), vector_element(c, 1));
   o->centroid = *c;
   o->area = polygon_area(o);
-  matrix_print(&o->vertices);
   return o;
 }
 
@@ -190,7 +189,6 @@ bool polygon_self_intersects(struct polygon* o) {
 
 bool vertices_intersect(struct matrix* verts) {
   // TODO: something faster than O(n^2)
-  printf("...............\n");
   unsigned N = verts->cols;
   for(unsigned i1 = 0; i1 < N; i1++) {
     unsigned ia1 = i1;
@@ -202,7 +200,6 @@ bool vertices_intersect(struct matrix* verts) {
       unsigned ib2 = (i1 + 2 + i2 + 1) % N;
       double* b1 = matrix_col_raw(verts, ib1);
       double* b2 = matrix_col_raw(verts, ib2);
-      printf("%d->%d | %d->%d, N: %d\n", ia1, ia2, ib1, ib2, N);
       if(lines_intersect_2D_raw(a1, a2, b1, b2)) {
         return true;
       }

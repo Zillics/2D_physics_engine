@@ -508,20 +508,6 @@ bool vectors_counter_clockwise_2D_raw(double* a, double* b, double* c) {
   return vectors_orientation_raw(a, b, c) < 0;
 }
 
-/*
-bool lines_intersect_2D_raw(double* a1, double* a2, double* b1, double* b2) {
-  printf("a1: (%.4f, %.4f), a2: (%.4f, %.4f), b1: (%.4f, %.4f), b2: (%.4f, %.4f)\n", a1[0], a1[1], a2[0], a2[1], b1[0], b1[1], b2[0], b2[1]);
-  if(vectors_counter_clockwise_2D_raw(a1, a2, b1) == vectors_counter_clockwise_2D_raw(a1, a2, b2)) {
-    return false;
-  }
-  if(vectors_counter_clockwise_2D_raw(b1, b2, a1) == vectors_counter_clockwise_2D_raw(b1, b2, a2)) {
-    return false;
-  }
-  return true;
-}
-
-*/
-
 void line_cut_end(double* p1, double* p2, unsigned N, double x) {
   for(unsigned i = 0; i < N; i++) {
     double dir;
@@ -535,19 +521,8 @@ void line_cut_end(double* p1, double* p2, unsigned N, double x) {
   }
 }
 
-// The main function that returns true if line segment 'p1q1'
-// and 'p2q2' intersect.
-bool lines_intersect_2D_raw(double* a1_, double* a2_, double* b1_, double* b2_)
+bool lines_intersect_2D_raw(double* a1, double* a2, double* b1, double* b2)
 {
-  double a1[2] = { a1_[0], a1_[1] };
-  double a2[2] = { a2_[0], a2_[1] };
-  double b1[2] = { b1_[0], b1_[1] };
-  double b2[2] = { b2_[0], b2_[1] };
-  line_cut_end(a1, a2, 2, 1e-4);
-  line_cut_end(b1, b2, 2, 1e-4);
-  printf("a1: (%.4f, %.4f), a2: (%.4f, %.4f), b1: (%.4f, %.4f), b2: (%.4f, %.4f)\n", a1[0], a1[1], a2[0], a2[1], b1[0], b1[1], b2[0], b2[1]);
-  // Find the four orientations needed for general and
-  // special cases
   int o1 = vectors_orientation_raw(a1, a2, b1);
   int o2 = vectors_orientation_raw(a1, a2, b2);
   int o3 = vectors_orientation_raw(b1, b2, a1);
@@ -555,34 +530,25 @@ bool lines_intersect_2D_raw(double* a1_, double* a2_, double* b1_, double* b2_)
 
   // General case
   if (o1 != o2 && o3 != o4) {
-  printf("A\n");
   return true;
   }
 
-  // Special Cases§
-  // p1, q1 and p2 are colinear and p2 lies on segment p1q1
+  // Special cases where points are collinear
   if (o1 == 0 && vector_lies_between(a1, b1, a2)) {
-  printf("B\n");
   return true;
   }
 
-  // p1, q1 and q2 are colinear and q2 lies on segment p1q1
   if (o2 == 0 && vector_lies_between(a1, b2, a2)) {
-  printf("C\n");
   return true;
   }
 
-  // p2, q2 and p1 are colinear and p1 lies on segment p2q2
   if (o3 == 0 && vector_lies_between(b1, a1, b2)) {
-  printf("D\n");
   return true;
   }
 
-  // p2, q2 and q1 are colinear and q1 lies on segment p2q2
   if (o4 == 0 && vector_lies_between(b1, a2, b2)) {
-  printf("E\n");
   return true;
   }
 
-  return false; // Doesn't fall in any of the above cases
+  return false;
 }

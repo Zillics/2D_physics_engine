@@ -166,9 +166,9 @@ struct matrix polygon_edge(struct polygon* o, unsigned i1) {
 
 double polygon_edge_angle(struct polygon* o, unsigned i1, unsigned i2) {
   unsigned N = polygon_nVertices(o);
-  struct matrix e1 = vector_subtract_raw(polygon_vertex(o, (i1 + 1) % N), polygon_vertex(o, i1), 2);
-  struct matrix e2 = vector_subtract_raw(polygon_vertex(o, (i2 + 1) % N), polygon_vertex(o, i2), 2);
-  return vector_angle(&e1, &e2);
+  struct matrix e1 = polygon_edge(o, i1);
+  struct matrix e2 = polygon_edge(o, i2);
+  return vector_angle(&e2, &e1);
 }
 
 bool polygon_is_convex(struct polygon* o) {

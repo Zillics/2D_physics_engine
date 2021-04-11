@@ -29,7 +29,7 @@ void hertel_melhorn(struct polygon* o);
  * @param o simple polygon
  * @param ears preallocated container which will be populated with the ears
  * */
-void ear_clipping(struct polygon* o, struct polygon* ears);
+void ear_clipping(struct polygon* o, struct polygon* ears, unsigned* nEars);
 
 /** Is triangle consisting of vertices i-1, i, i+1 an ear of polygon?
  * @param o simple polygon

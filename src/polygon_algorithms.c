@@ -1,5 +1,6 @@
 #include "polygon_algorithms.h"
 #include "winding_number_algorithm.h"
+#include "utils.h"
 
 bool polygon_axes_overlap(struct polygon* o1, struct polygon* o2) {
     for(unsigned axis = 0; axis < polygon_nVertices(o1); axis++) {
@@ -30,24 +31,33 @@ bool separated_axis_theorem(struct polygon* o1, struct polygon* o2) {
 }
 
 
-void ear_clipping(struct polygon* o, struct polygon* ears) {
-  unsigned N = polygon_nVertices(o);
-  unsigned iEar = 0;
-  unsigned remainingVertices = N;
-  for(unsigned i = 0; i < remainingVertices; i++) {
+void ear_clipping(struct polygon* o, struct polygon* ears, unsigned* nEars) {
+  int N = polygon_nVertices(o);
+  *nEars = 0;
+  int remainingVertices = N;
+  for(int i = 0; i < remainingVertices; i++) {
+    printf("ear_clipping %d\n", i);
     if(is_an_ear(o, i)) {
-      unsigned vertix_idx[3] = { (i - 1) % N, i, (i + 1) % N };
-      struct polygon* triangle = polygon_create_sub(o, 3, vertix_idx);
-      ears[iEar] = *triangle;
-      iEar += 1;
+      unsigned i1 = modulo(i-1, N);
+      unsigned i2 = i;
+      unsigned i3 = i + 1 % N;
+      unsigned vertex_idx[3] = { i1, i2, i3 };
+      printf("ear_clipping creating ear....\n");
+      struct polygon* triangle = polygon_create_sub(o, 3, vertex_idx);
+      printf("ear created!\n");
+      polygon_print(triangle);
+      ears[*nEars] = *triangle;
+      *nEars += 1;
     }
   }
+  printf("ear clipping done\n");
 }
 
 bool is_an_ear(struct polygon* o, int i2) {
   unsigned N = polygon_nVertices(o);
-  int i1 = (i2-1) % N;
+  int i1 = modulo(i2-1, N);
   int i3 = (i2+1) % N;
+  printf("is_an_ear indices: %d %d %d\n", i1, i2, i3);
   // 1. Is angle between edge i-1 and i convex?
   if(polygon_edge_angle(o, i1, i2) > M_PI) {
     return false;

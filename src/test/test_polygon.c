@@ -73,18 +73,44 @@ START_TEST(test_polygon_inertia) {
 }
 END_TEST
 
-Suite* matrix_suite(void)
+START_TEST(test_generate) {
+  for(unsigned i = 0; i < 25; i++) {
+    unsigned nVertices = random_int(3, 20);
+    double r = random_double(1.0, 100.0);
+    printf("GENERATING %d\n", i);
+    struct polygon* poly = polygon_generate(nVertices, r);
+    ck_assert_int_eq(nVertices, polygon_nVertices(poly));
+  }
+} END_TEST
+
+START_TEST(test_create_sub) {
+  for(unsigned i = 0; i < 5; i++) {
+    unsigned nVertices = 5;
+    double r = random_double(1.0, 100.0);
+    struct polygon* poly = polygon_generate(nVertices, r);
+    unsigned subVertices1[3] = {0, 1, 2};
+    struct polygon* subPoly1 = polygon_create_sub(poly, 3, subVertices1);
+    unsigned subVertices2[3] = {1, 2, 3};
+    struct polygon* subPoly2 = polygon_create_sub(poly, 3, subVertices2);
+    unsigned subVertices3[3] = {2, 3, 4};
+    struct polygon* subPoly3 = polygon_create_sub(poly, 3, subVertices3);
+    unsigned subVertices4[3] = {3, 4, 0};
+    struct polygon* subPoly4 = polygon_create_sub(poly, 3, subVertices4);
+    unsigned subVertices5[3] = {4, 0, 1};
+    struct polygon* subPoly5 = polygon_create_sub(poly, 3, subVertices5);
+  }
+} END_TEST
+
+Suite* polygon_suite(void)
 {
     Suite *s;
     TCase *tc_core;
 
     s = suite_create("Polygon");
-
     /* Core test case */
     tc_core = tcase_create("Core");
 
-    //tcase_add_test(tc_core, test_triangle_area);
-    //tcase_add_test(tc_core, test_polygon_area);
+    tcase_add_test(tc_core, test_generate);
     suite_add_tcase(s, tc_core);
 
     return s;
@@ -96,8 +122,20 @@ int main(void)
     Suite *s;
     SRunner *sr;
 
-    s = matrix_suite();
+    s = polygon_suite();
     sr = srunner_create(s);
+
+#ifdef FORK
+    enum fork_status fork_status = CK_FORK_GETENV;
+    if(FORK == 0) {
+      fork_status = CK_NOFORK;
+      printf("Setting fork off\n");
+    } else if(FORK == 1) {
+      fork_status = CK_FORK;
+      printf("Setting fork on\n");
+    }
+    srunner_set_fork_status(sr, fork_status);
+#endif
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

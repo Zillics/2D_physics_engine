@@ -1,5 +1,4 @@
-# Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
-
+# Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/0
 EXEC_DIR := ./bin
 BUILD_DIR := ./build
 SRC_DIRS := ./src
@@ -31,9 +30,14 @@ LDFLAGS := $(shell sdl2-config --libs) $(shell pkg-config --libs check) -lm
 .PHONY: all
 all: $(EXECUTABLES)
 
-
 .PHONY: test
 test: $(TEST_EXECS)
+	scripts/run_tests.sh
+
+.PHONY: debug
+debug: CFLAGS += -g -D"FORK=0"
+	export CK_FORK=no
+debug: $(EXECUTABLES) $(TEST_EXECS)
 
 $(EXEC_DIR)/%: $(OBJS) $(BUILD_DIR)/src/mains/%.c.o
 	mkdir -p $(EXEC_DIR)
@@ -41,7 +45,6 @@ $(EXEC_DIR)/%: $(OBJS) $(BUILD_DIR)/src/mains/%.c.o
 
 $(BUILD_DIR)/src/test/%: $(OBJS) $(BUILD_DIR)/src/test/%.c.o
 	@$(CC) $^ -o $@ $(LDFLAGS)
-	$@
 
 $(BUILD_DIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
@@ -49,7 +52,8 @@ $(BUILD_DIR)/%.c.o: %.c
 
 .PHONY: clean
 clean:
-	rm -r $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)
+	rm -f $(EXEC_DIR)/*
 
 # Include the .d makefiles. The - at the front suppresses the errors of missing
 # Makefiles. Initially, all the .d files will be missing, and we don't want those

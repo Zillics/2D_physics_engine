@@ -46,6 +46,7 @@ struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsign
   double vertices[nVertices][2];
   for(unsigned i = 0; i < nVertices; i++) {
     unsigned vi = vertex_idx[i];
+    printf("polygon_create_sub: idx: %d\n", vi);
     vertices[i][0] = polygon_vertex(o, vi)[0];
     vertices[i][1] = polygon_vertex(o, vi)[1];
   }
@@ -87,6 +88,7 @@ unsigned polygon_nVertices(struct polygon* o) {
   return o->vertices.cols;
 }
 double* polygon_vertex(struct polygon* o, unsigned i) {
+  assert(polygon_nVertices(o) > i);
   return o->vertices.data + i * o->vertices.rows;
 }
 

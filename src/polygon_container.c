@@ -1,5 +1,6 @@
 #include "color.h"
 #include "polygon_container.h"
+#include "utils.h"
 
 struct polygon_container* polygon_container_new(unsigned nPolygons, unsigned nVertices) {
   struct polygon_container* pc = malloc(sizeof(struct polygon_container));
@@ -17,7 +18,6 @@ void polygon_container_delete(struct polygon_container* pc) {
   free(pc);
 }
 
-
 void polygon_container_reset(struct polygon_container* pc, unsigned nPolygons, unsigned nVertices) {
   for(unsigned i = 0; i < pc->nPolygons; i++) {
     polygon_container_pop(pc);
@@ -29,7 +29,12 @@ void polygon_container_reset(struct polygon_container* pc, unsigned nPolygons, u
     polygon_container_append(pc, o);
   }
 }
-
+void polygon_container_resize(struct polygon_container* pc, unsigned nPolygons) {
+  unsigned nPop = imax(0, (int)pc->nPolygons - (int)nPolygons);
+  for(unsigned i = 0; i < nPop; i++) {
+    polygon_container_pop(pc);
+  }
+}
 void polygon_container_append(struct polygon_container* pc, struct polygon* o) {
   size_t size = polygon_size(o);
   pc->polygons = realloc(pc->polygons, pc->mem_polygons + size);

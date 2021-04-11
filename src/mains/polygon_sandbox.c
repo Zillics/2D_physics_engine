@@ -3,6 +3,7 @@
 #include "../object.h"
 #include "../arena.h"
 #include "../polygon_container.h"
+#include "../polygon_algorithms.h"
 #include "../linear_algebra.h"
 
 #define FPS 100
@@ -92,10 +93,14 @@ int main(int argc, char* argv[])
                         switch(event.key.keysym.scancode) {
                           case SDL_SCANCODE_A:
                             {
+                              printf("Performing ear clipping\n");
                               // Ear clipping
                               polygon_container_reset(pc, polygon_nVertices(o), 3);
-                              ear_clipping(o, &pc->polygons);
+                              unsigned nEars = 0;
+                              ear_clipping(o, pc->polygons, &nEars);
+                              polygon_container_resize(pc, nEars);
                               drawPolygons = true;
+                              printf("Ear clipping performed. Ears: %d\n", nEars);
                             }
                             break;
                           case SDL_SCANCODE_S:

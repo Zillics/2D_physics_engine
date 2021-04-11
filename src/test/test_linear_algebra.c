@@ -177,14 +177,6 @@
     ck_assert_double_eq_tol(matrix_determinant_3D(A3), -12.0, 1e-6);
   } END_TEST
 
-  START_TEST (test_lines_intersect) {
-  //a1: (735.0000, 163.0000), a2: (564.0000, 182.0000), b1: (564.0000, 182.0000), b2: (558.0000, 349.0000)
-  double a1[2] = { 735.0000, 163.0000 };
-  double a2[2] = { 564.0000, 182.0000 };
-  double b1[2] = { 564.0000, 182.0000 };
-  double b2[2] = { 558.0000, 349.0000 };
-  ck_assert(!lines_intersect_2D_raw(a1, a2, b1, b2));
-  } END_TEST
 
 Suite* matrix_suite(void)
 {
@@ -204,7 +196,6 @@ Suite* matrix_suite(void)
     tcase_add_test(tc_core, test_vector_projection);
     tcase_add_test(tc_core, test_vector_angle);
     tcase_add_test(tc_core, test_determinant);
-    tcase_add_test(tc_core, test_lines_intersect);
     suite_add_tcase(s, tc_core);
 
     return s;

@@ -210,6 +210,16 @@ int main(void)
     s = matrix_suite();
     sr = srunner_create(s);
 
+#ifdef FORK
+    enum fork_status fork_status = CK_FORK_GETENV;
+    if(FORK == 0) {
+      fork_status = CK_NOFORK;
+    } else if(FORK == 1) {
+      fork_status = CK_FORK;
+    }
+    srunner_set_fork_status(sr, fork_status);
+#endif
+
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);

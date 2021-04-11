@@ -129,10 +129,8 @@ int main(void)
     enum fork_status fork_status = CK_FORK_GETENV;
     if(FORK == 0) {
       fork_status = CK_NOFORK;
-      printf("Setting fork off\n");
     } else if(FORK == 1) {
       fork_status = CK_FORK;
-      printf("Setting fork on\n");
     }
     srunner_set_fork_status(sr, fork_status);
 #endif

@@ -58,6 +58,24 @@ START_TEST(test_pop) {
 }
 END_TEST
 
+START_TEST(test_resize) {
+  unsigned nPolygons = 30;
+  struct polygon_container* pc = polygon_container_generate(nPolygons, 5, 10, 10.0); 
+  struct polygon* poly_20 = polygon_copy(pc->polygons + 19);
+  ck_assert_int_eq(pc->nPolygons, nPolygons);
+  polygon_container_resize(pc, 20);
+  ck_assert_int_eq(pc->nPolygons, 20);
+  ck_assert(polygon_eq(poly_20, pc->polygons + 19));
+  polygon_container_reset(pc, 0, 0);
+  polygon_container_resize(pc, 0);
+  ck_assert_int_eq(pc->nPolygons, 0);
+  polygon_container_reset(pc, 15, 4);
+  ck_assert_int_eq(pc->nPolygons, 15);
+  polygon_container_resize(pc, 0);
+  ck_assert_int_eq(pc->nPolygons, 0);
+
+} END_TEST
+
 Suite* polygon_container_suite(void)
 {
     Suite *s;
@@ -71,6 +89,7 @@ Suite* polygon_container_suite(void)
     tcase_add_test(tc_core, test_smoke);
     tcase_add_test(tc_core, test_append);
     tcase_add_test(tc_core, test_pop);
+    tcase_add_test(tc_core, test_resize);
     suite_add_tcase(s, tc_core);
 
     return s;

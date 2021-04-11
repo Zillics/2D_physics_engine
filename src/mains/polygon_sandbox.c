@@ -77,6 +77,8 @@ int main(int argc, char* argv[])
                                 printf("Polygon self intersects -> not simple! Only simple polygons accepted\n");
                                 o = NULL;
                               } else {
+                                // Replace old polygon with new one
+                                polygon_container_reset(pc, 0, 0);
                                 o = temp;
                               }
                             }
@@ -99,6 +101,7 @@ int main(int argc, char* argv[])
                               polygon_container_reset(pc, polygon_nVertices(o), 3);
                               unsigned nEars = 0;
                               ear_clipping(o, pc->polygons, &nEars);
+                              printf("Resizing pc...\n");
                               polygon_container_resize(pc, nEars);
                               drawPolygons = true;
                               printf("Ear clipping performed. Ears: %d\n", nEars);

@@ -4,6 +4,8 @@
 #include "utils.h"
 #include "linear_algebra.h"
 
+static double FTOL = 1e-6;
+
 struct matrix* matrix_new(unsigned rows, unsigned cols, double initVal) {
   struct matrix* A = malloc(sizeof(struct matrix));
   A->data = malloc(rows * cols * sizeof(double));
@@ -250,6 +252,22 @@ struct matrix matrix_cross_product(struct matrix* a, struct matrix* b) {
 
 size_t matrix_size(struct matrix* A) {
   return sizeof(struct matrix) + A->rows * A->cols * sizeof(double);
+}
+
+bool matrix_eq(struct matrix* A, struct matrix* B) {
+  unsigned m = A->rows;
+  unsigned n = A->cols;
+  if(m != B->rows || n != B->cols) {
+    return false;
+  }
+  for(unsigned i = 0; i < m; i++) {
+    for(unsigned j = 0; j < n; j++) {
+      if(fabs(matrix_value(A, i, j) - matrix_value(B, i, j)) > FTOL) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 void matrix_print(struct matrix* A) {

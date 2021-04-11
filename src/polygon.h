@@ -47,6 +47,7 @@ struct matrix polygon_edge_normal(struct polygon* o, unsigned i);
 struct matrix polygon_edge_midpoint(struct polygon* o, unsigned i);
 struct matrix polygon_compute_edge_normal(struct polygon* o, unsigned i, bool inward);
 struct matrix polygon_compute_edge_midpoint(struct polygon* o, unsigned i);
+bool polygon_eq(struct polygon* o1, struct polygon* o2);
 void polygon_recompute_edge_normals(struct polygon* o, bool inward);
 void polygon_recompute_edge_midpoints(struct polygon* o);
 void polygon_centroid(struct polygon* o, double* x, double* y);

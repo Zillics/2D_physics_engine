@@ -32,35 +32,33 @@ bool separated_axis_theorem(struct polygon* o1, struct polygon* o2) {
 
 
 void ear_clipping(struct polygon* o, struct polygon* ears, unsigned* nEars) {
-  int N = polygon_nVertices(o);
+  struct polygon *copy = polygon_copy(o);
+  int N = polygon_nVertices(copy);
   *nEars = 0;
   int remainingVertices = N;
-  for(int i = 0; i < remainingVertices; i++) {
-    printf("ear_clipping %d\n", i);
-    if(is_an_ear(o, i)) {
-      unsigned i1 = modulo(i-1, N);
+  for(int i = 0; (i < remainingVertices) && (remainingVertices > 3); i++) {
+    if(is_an_ear(copy, i)) {
+      unsigned i1 = modulo(i-1, remainingVertices);
       unsigned i2 = i;
-      unsigned i3 = i + 1 % N;
+      unsigned i3 = (i + 1) % remainingVertices;
       unsigned vertex_idx[3] = { i1, i2, i3 };
-      printf("ear_clipping creating ear....\n");
-      struct polygon* triangle = polygon_create_sub(o, 3, vertex_idx);
-      printf("ear created!\n");
-      polygon_print(triangle);
+      struct polygon* triangle = polygon_create_sub(copy, 3, vertex_idx);
       ears[*nEars] = *triangle;
       *nEars += 1;
+      polygon_remove_vertex(copy, i);
+      i = 0;
+      remainingVertices -= 1;
     }
   }
-  printf("ear clipping done\n");
+  polygon_delete(copy);
 }
 
 bool is_an_ear(struct polygon* o, int i2) {
   unsigned N = polygon_nVertices(o);
   int i1 = modulo(i2-1, N);
   int i3 = (i2+1) % N;
-  printf("is_an_ear indices: %d %d %d\n", i1, i2, i3);
   // 1. Is angle between edge i-1 and i convex?
   double angle = polygon_edge_angle(o, i1, i2);
-  printf("angle: %.4f", angle);
   if(angle > M_PI) {
     return false;
   }
@@ -71,9 +69,9 @@ bool is_an_ear(struct polygon* o, int i2) {
   struct matrix* triangle = matrix_create(2, 3, points);
   // 2. Does triangle contain any of the polygon vertices?
   for(unsigned i = 0; i < N - 3; i++) {
-    unsigned idx = i % N; 
+    unsigned idx = (i3 + i + 1) % N;
     if(wn_PnPoly(polygon_vertex(o, idx), triangle, o->vertices.cols)) {
-    return false;
+      return false;
     }
   }
   return true;

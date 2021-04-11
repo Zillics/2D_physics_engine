@@ -36,10 +36,10 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
 
 struct polygon* polygon_copy(struct polygon* o) {
   unsigned nVertices = polygon_nVertices(o);
-  double vertices[2][nVertices];
+  double vertices[nVertices][2];
   for(unsigned i = 0; i < nVertices; i++) {
-    vertices[i][0] = polygon_vertex(o, i)[0]; 
-    vertices[i][1] = polygon_vertex(o, i)[1]; 
+    vertices[i][0] = polygon_vertex(o, i)[0];
+    vertices[i][1] = polygon_vertex(o, i)[1];
   }
   return polygon_new(nVertices, vertices, o->color);
 }
@@ -48,7 +48,6 @@ struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsign
   double vertices[nVertices][2];
   for(unsigned i = 0; i < nVertices; i++) {
     unsigned vi = vertex_idx[i];
-    printf("polygon_create_sub: idx: %d\n", vi);
     vertices[i][0] = polygon_vertex(o, vi)[0];
     vertices[i][1] = polygon_vertex(o, vi)[1];
   }
@@ -84,6 +83,13 @@ void polygon_delete(struct polygon* o) {
   matrix_delete(&o->vertices);
   matrix_delete(&o->edge_normals);
   matrix_delete(&o->edge_midpoints);
+}
+
+bool polygon_eq(struct polygon* o1, struct polygon* o2) {
+  if(!matrix_eq(&o1->vertices, &o2->vertices)) {
+    return false;
+  }
+  return true;
 }
 
 void polygon_remove_vertex(struct polygon* o, unsigned idx) {
@@ -327,9 +333,11 @@ size_t polygon_size(struct polygon* o) {
 }
 
 void polygon_print(struct polygon* o) {
+  printf("Polygon of %d vertices\n", polygon_nVertices(o));
   for(unsigned i = 0; i < polygon_nVertices(o); i++) {
     printf("\t(%f, %f)\n", polygon_vertex(o, i)[0], polygon_vertex(o, i)[1]);
   }
+  printf("-----------------------------\n");
 }
 
 

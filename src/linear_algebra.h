@@ -46,6 +46,7 @@ struct matrix matrix_rowwise_min(struct matrix* A);
 struct matrix matrix_rowwise_max(struct matrix* A);
 struct matrix matrix_colwise_min(struct matrix* A);
 struct matrix matrix_colwise_max(struct matrix* A);
+bool matrix_eq(struct matrix* A, struct matrix* B);
 double matrix_sum(struct matrix* A);
 double matrix_min(struct matrix* A);
 double matrix_max(struct matrix* A);

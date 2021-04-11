@@ -77,7 +77,6 @@ START_TEST(test_generate) {
   for(unsigned i = 0; i < 25; i++) {
     unsigned nVertices = random_int(5, 20);
     double r = random_double(1.0, 100.0);
-    printf("GENERATING %d:th polygon with %d vertices\n", i, nVertices);
     struct polygon* poly = polygon_generate(nVertices, r);
     ck_assert_int_eq(nVertices, polygon_nVertices(poly));
   }
@@ -108,8 +107,19 @@ START_TEST(test_edge_angle) {
   ck_assert_double_eq_tol(polygon_edge_angle(square, 1, 2), 0.5 * M_PI, 1e-4); 
   ck_assert_double_eq_tol(polygon_edge_angle(square, 2, 3), 0.5 * M_PI, 1e-4); 
   ck_assert_double_eq_tol(polygon_edge_angle(square, 3, 0), 0.5 * M_PI, 1e-4); 
-}
-  END_TEST
+} END_TEST
+
+START_TEST(test_copy) {
+  struct polygon* o = polygon_generate(20, 5.0);
+  struct polygon* copy = polygon_copy(o);
+  ck_assert_int_eq(polygon_nVertices(o), polygon_nVertices(copy));
+  ck_assert_int_eq(polygon_nVertices(o), polygon_nVertices(copy));
+  polygon_delete(o);
+  polygon_delete(copy);
+  ck_assert(matrix_eq(&o->vertices, &copy->vertices));
+  ck_assert(matrix_eq(&o->edge_normals, &copy->edge_normals));
+  ck_assert(matrix_eq(&o->edge_midpoints, &copy->edge_midpoints));
+} END_TEST
 
 Suite* polygon_suite(void)
 {
@@ -122,6 +132,7 @@ Suite* polygon_suite(void)
 
     tcase_add_test(tc_core, test_generate);
     tcase_add_test(tc_core, test_edge_angle);
+    tcase_add_test(tc_core, test_copy);
     suite_add_tcase(s, tc_core);
 
     return s;

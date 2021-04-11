@@ -30,7 +30,6 @@ bool separated_axis_theorem(struct polygon* o1, struct polygon* o2) {
 }
 
 
-
 void ear_clipping(struct polygon* o, struct polygon* ears) {
   unsigned N = polygon_nVertices(o);
   unsigned iEar = 0;

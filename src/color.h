@@ -7,6 +7,7 @@ struct color {
   unsigned char b;
 };
 
+struct color color_black();
 struct color color_red();
 struct color color_green();
 struct color color_blue();

@@ -1,5 +1,10 @@
 #include "color.h"
 
+struct color color_black() {
+  struct color black = { .r=0, .g=0, .b=0 };
+  return black;
+}
+
 struct color color_red() {
   struct color red = { .r=255, .g=0, .b=0 };
   return red;

@@ -59,7 +59,9 @@ bool is_an_ear(struct polygon* o, int i2) {
   int i3 = (i2+1) % N;
   printf("is_an_ear indices: %d %d %d\n", i1, i2, i3);
   // 1. Is angle between edge i-1 and i convex?
-  if(polygon_edge_angle(o, i1, i2) > M_PI) {
+  double angle = polygon_edge_angle(o, i1, i2);
+  printf("angle: %.4f", angle);
+  if(angle > M_PI) {
     return false;
   }
   double points[3][2] =   { {polygon_vertex(o, i1)[0], polygon_vertex(o, i1)[1]},

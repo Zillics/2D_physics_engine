@@ -5,6 +5,7 @@
 #include "../polygon_container.h"
 #include "../polygon_algorithms.h"
 #include "../linear_algebra.h"
+#include "../utils.h"
 
 #define FPS 100
 #define DT_MS(X) 1000 / FPS
@@ -104,6 +105,11 @@ int main(int argc, char* argv[])
                             }
                             break;
                           case SDL_SCANCODE_S:
+                            {
+                              printf("Removing vertex\n");
+                              unsigned idx = random_int(0, polygon_nVertices(o));
+                              polygon_remove_vertex(o, 2);
+                            }
                             break;
                           case SDL_SCANCODE_D:
                             break;

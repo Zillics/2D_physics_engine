@@ -21,11 +21,13 @@ struct polygon {
 
 struct polygon* new_square(int x, int y, unsigned width, struct color color);
 struct polygon* polygon_new(unsigned nVertices, double vertices[2][nVertices], struct color color);
+struct polygon* polygon_copy(struct polygon* o);
 struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsigned* vertix_idx);
 /** Randomly generate a simple polygon of N vertices. */
 struct polygon* polygon_generate(unsigned N, double r);
 size_t polygon_size(struct polygon* o);
 void polygon_delete(struct polygon* o);
+void polygon_remove_vertex(struct polygon* p, unsigned i);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);
 void polygon_render_vertex(struct polygon* o, SDL_Renderer* renderer, unsigned i1);
 unsigned polygon_nVertices(struct polygon* o);
@@ -46,6 +48,7 @@ struct matrix polygon_edge_midpoint(struct polygon* o, unsigned i);
 struct matrix polygon_compute_edge_normal(struct polygon* o, unsigned i, bool inward);
 struct matrix polygon_compute_edge_midpoint(struct polygon* o, unsigned i);
 void polygon_recompute_edge_normals(struct polygon* o, bool inward);
+void polygon_recompute_edge_midpoints(struct polygon* o);
 void polygon_centroid(struct polygon* o, double* x, double* y);
 bool polygon_contains(struct polygon* o, double* p);
 void polygon_rotate(struct polygon* o, double deg);

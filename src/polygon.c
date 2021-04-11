@@ -25,21 +25,23 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
   assert(vertices_clockwise(&o->vertices));
   bool inward = false;
   polygon_recompute_edge_normals(o, inward);
-  struct matrix n;
-  o->edge_midpoints = *matrix_new(3, nVertices, 0.0);
-  struct matrix m;
-  for(unsigned i = 0; i < nVertices; i++) {
-    m = polygon_compute_edge_midpoint(o, i);
-    *matrix_element(&o->edge_midpoints, 0, i) = matrix_value(&m, 0, 0);
-    *matrix_element(&o->edge_midpoints, 1, i) = matrix_value(&m, 1, 0);
-    *matrix_element(&o->edge_midpoints, 2, i) = 1.0;
-  }
+  polygon_recompute_edge_midpoints(o);
   o->color = color;
   struct matrix* c = vector_new(3, 1.0);
   polygon_centroid(o, vector_element(c, 0), vector_element(c, 1));
   o->centroid = *c;
   o->area = polygon_area(o);
   return o;
+}
+
+struct polygon* polygon_copy(struct polygon* o) {
+  unsigned nVertices = polygon_nVertices(o);
+  double vertices[2][nVertices];
+  for(unsigned i = 0; i < nVertices; i++) {
+    vertices[i][0] = polygon_vertex(o, i)[0]; 
+    vertices[i][1] = polygon_vertex(o, i)[1]; 
+  }
+  return polygon_new(nVertices, vertices, o->color);
 }
 
 struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsigned* vertex_idx) {
@@ -82,6 +84,38 @@ void polygon_delete(struct polygon* o) {
   matrix_delete(&o->vertices);
   matrix_delete(&o->edge_normals);
   matrix_delete(&o->edge_midpoints);
+}
+
+void polygon_remove_vertex(struct polygon* o, unsigned idx) {
+  unsigned nVertices = polygon_nVertices(o);
+  assert(idx < nVertices);
+  assert(nVertices > 3);
+
+  printf("removing vertex %d\n", idx);
+  printf("OLD VERTICES:\n");
+  matrix_print(&o->vertices);
+
+  struct matrix* new_vertices = matrix_new(3, nVertices - 1, 1.0);
+  if(idx > 0) {
+    memcpy(new_vertices->data, o->vertices.data, sizeof(double) * 3 * idx);
+  }
+
+  printf("NEW VERTICES 1:\n");
+  matrix_print(new_vertices);
+
+  unsigned leftOvers = nVertices - idx - 1;
+  if(leftOvers > 0) {
+    memcpy(matrix_col_raw(new_vertices, idx), matrix_col_raw(&o->vertices, idx + 1), sizeof(double) * 3 * leftOvers);
+  }
+
+  printf("NEW VERTICES 2:\n");
+  matrix_print(new_vertices);
+
+  o->vertices = *new_vertices;
+  polygon_recompute_edge_normals(o, o->edge_normals_inward);
+  polygon_recompute_edge_midpoints(o);
+  polygon_centroid(o, o->centroid.data, o->centroid.data + 1);
+  o->area = polygon_area(o);
 }
 
 unsigned polygon_nVertices(struct polygon* o) {
@@ -148,6 +182,18 @@ void polygon_recompute_edge_normals(struct polygon* o, bool inward) {
   }
 }
 
+void polygon_recompute_edge_midpoints(struct polygon* o) {
+  unsigned nVertices = polygon_nVertices(o);
+  o->edge_midpoints = *matrix_new(3, nVertices, 0.0);
+  struct matrix m;
+  for(unsigned i = 0; i < nVertices; i++) {
+    m = polygon_compute_edge_midpoint(o, i);
+    *matrix_element(&o->edge_midpoints, 0, i) = matrix_value(&m, 0, 0);
+    *matrix_element(&o->edge_midpoints, 1, i) = matrix_value(&m, 1, 0);
+    *matrix_element(&o->edge_midpoints, 2, i) = 1.0;
+  }
+}
+
 void polygon_centroid(struct polygon* o, double* x, double* y) {
   *x = 0.0;
   *y = 0.0;
@@ -170,7 +216,7 @@ double polygon_edge_angle(struct polygon* o, unsigned i1, unsigned i2) {
   unsigned N = polygon_nVertices(o);
   struct matrix e1 = polygon_edge(o, i1);
   struct matrix e2 = polygon_edge(o, i2);
-  return vector_angle(&e2, &e1);
+  return vector_angle(&e1, &e2);
 }
 
 bool polygon_is_convex(struct polygon* o) {

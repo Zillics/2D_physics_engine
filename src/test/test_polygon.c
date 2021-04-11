@@ -75,9 +75,9 @@ END_TEST
 
 START_TEST(test_generate) {
   for(unsigned i = 0; i < 25; i++) {
-    unsigned nVertices = random_int(3, 20);
+    unsigned nVertices = random_int(5, 20);
     double r = random_double(1.0, 100.0);
-    printf("GENERATING %d\n", i);
+    printf("GENERATING %d:th polygon with %d vertices\n", i, nVertices);
     struct polygon* poly = polygon_generate(nVertices, r);
     ck_assert_int_eq(nVertices, polygon_nVertices(poly));
   }
@@ -101,6 +101,16 @@ START_TEST(test_create_sub) {
   }
 } END_TEST
 
+
+START_TEST(test_edge_angle) {
+  struct polygon* square = new_square(50, 50, 19, color_black());
+  ck_assert_double_eq_tol(polygon_edge_angle(square, 0, 1), 0.5 * M_PI, 1e-4); 
+  ck_assert_double_eq_tol(polygon_edge_angle(square, 1, 2), 0.5 * M_PI, 1e-4); 
+  ck_assert_double_eq_tol(polygon_edge_angle(square, 2, 3), 0.5 * M_PI, 1e-4); 
+  ck_assert_double_eq_tol(polygon_edge_angle(square, 3, 0), 0.5 * M_PI, 1e-4); 
+}
+  END_TEST
+
 Suite* polygon_suite(void)
 {
     Suite *s;
@@ -111,6 +121,7 @@ Suite* polygon_suite(void)
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, test_generate);
+    tcase_add_test(tc_core, test_edge_angle);
     suite_add_tcase(s, tc_core);
 
     return s;

@@ -1,5 +1,5 @@
 #!/bin/sh
-tests=`ls -d $PWD/build/src/test/*`
+tests=`find build/src/test/ -type f \( ! -iname "*.o" \)`
 
 for test in $tests; do
   echo "$test"

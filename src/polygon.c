@@ -90,27 +90,14 @@ void polygon_remove_vertex(struct polygon* o, unsigned idx) {
   unsigned nVertices = polygon_nVertices(o);
   assert(idx < nVertices);
   assert(nVertices > 3);
-
-  printf("removing vertex %d\n", idx);
-  printf("OLD VERTICES:\n");
-  matrix_print(&o->vertices);
-
   struct matrix* new_vertices = matrix_new(3, nVertices - 1, 1.0);
   if(idx > 0) {
     memcpy(new_vertices->data, o->vertices.data, sizeof(double) * 3 * idx);
   }
-
-  printf("NEW VERTICES 1:\n");
-  matrix_print(new_vertices);
-
   unsigned leftOvers = nVertices - idx - 1;
   if(leftOvers > 0) {
     memcpy(matrix_col_raw(new_vertices, idx), matrix_col_raw(&o->vertices, idx + 1), sizeof(double) * 3 * leftOvers);
   }
-
-  printf("NEW VERTICES 2:\n");
-  matrix_print(new_vertices);
-
   o->vertices = *new_vertices;
   polygon_recompute_edge_normals(o, o->edge_normals_inward);
   polygon_recompute_edge_midpoints(o);

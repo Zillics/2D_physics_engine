@@ -269,7 +269,7 @@ bool vertices_clockwise(struct matrix* verts) {
 }
 
 bool polygon_contains(struct polygon* o, double* p) {
-  return wn_PnPoly(p, &o->vertices, o->vertices.cols) != 0;
+  return wn_PnPoly(p, &o->vertices) != 0;
 }
 
 void polygon_rotate(struct polygon* o, double deg) {
@@ -333,10 +333,11 @@ size_t polygon_size(struct polygon* o) {
 }
 
 void polygon_print(struct polygon* o) {
-  printf("Polygon of %d vertices\n", polygon_nVertices(o));
+  printf("Polygon of %d vertices:\n", polygon_nVertices(o));
   for(unsigned i = 0; i < polygon_nVertices(o); i++) {
     printf("\t(%f, %f)\n", polygon_vertex(o, i)[0], polygon_vertex(o, i)[1]);
   }
+  color_print(&o->color);
   printf("-----------------------------\n");
 }
 

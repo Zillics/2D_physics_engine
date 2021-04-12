@@ -15,5 +15,6 @@ struct arena* arena_new(double x_min, double y_min, double x_max, double y_max);
 void arena_delete(struct arena* a);
 void arena_tick(struct arena* a, double dt);
 void arena_render(struct arena* a, SDL_Renderer* renderer);
+struct object* arena_find_object_at(struct arena* a, double x, double y);
 
 #endif

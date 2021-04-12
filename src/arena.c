@@ -47,3 +47,14 @@ void arena_render(struct arena* a, SDL_Renderer* renderer) {
   }
   polygon_render(&a->border, renderer);
 }
+
+struct object* arena_find_object_at(struct arena* a, double x, double y) {
+  // TODO: more efficient approach
+  double point[2] = { x, y };
+  for(unsigned i = 0; i < a->objects.nObjects; i++) {
+    if(polygon_contains(&a->objects.objects[i].shape, point)) {
+      return a->objects.objects + i;
+    }
+  }
+  return NULL;
+}

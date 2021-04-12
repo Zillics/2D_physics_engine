@@ -47,6 +47,11 @@ void polygon_container_resize(struct polygon_container* pc, unsigned nPolygons) 
     polygon_container_pop(pc);
   }
 }
+
+size_t polygon_container_size(struct polygon_container* pc) {
+  return sizeof(struct polygon_container) + pc->mem_polygons;
+}
+
 void polygon_container_append(struct polygon_container* pc, struct polygon* o) {
   size_t size = polygon_size(o);
   pc->polygons = realloc(pc->polygons, pc->mem_polygons + size);

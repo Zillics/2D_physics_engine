@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
                               printf("Resizing pc...\n");
                               polygon_container_resize(pc, nEars);
                               drawPolygons = true;
-                              printf("Ear clipping performed. Ears: %d\n", nEars);
+                              printf("Ear clipping performed. Ears: %d, N: %d\n", nEars, polygon_nVertices(o));
                             }
                             break;
                           case SDL_SCANCODE_S:

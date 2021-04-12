@@ -26,7 +26,7 @@ static inline int isLeft( double* P0, double* P1, double* P2 );
 //      Input:   P = a point,
 //               V[] = vertex points of a polygon V[n+1] with V[n]=V[0]
 //      Return:  wn = the winding number (=0 only when P is outside)
-int wn_PnPoly( double* P, struct matrix* V, int n );
+int wn_PnPoly( double* P, struct matrix* V);
 
 
 #endif

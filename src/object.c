@@ -1,25 +1,25 @@
 #include "object.h"
 
-struct object* object_generate(unsigned nPoints, double r) {
+struct object* object_new(struct polygon shape) {
   struct object* o = malloc(sizeof(struct object));
-  o->shape = *polygon_generate(nPoints, r);
+  o->shape = shape;
   double direction[3] = { 0.0, 1.0, 1.0 };
   o->direction = *vector_create(direction, 3);
   o->state = *vector_new(9, 0.0);
   object_reset_state(o);
   o->density = 1.0;
+  object_triangulate(o);
   return o;
 }
 
+struct object* object_generate(unsigned nPoints, double r) {
+  struct polygon shape = *polygon_generate(nPoints, r);
+  return object_new(shape);
+}
+
 struct object* new_square_object(double width, struct color color, double density) {
-  struct object* o = malloc(sizeof(struct object));
-  o->shape = *new_square(0.0, 0.0, width, color);
-  double direction[3] = { 0.0, 1.0, 1.0 };
-  o->direction = *vector_create(direction, 3);
-  o->state = *vector_new(9, 0.0);
-  object_reset_state(o);
-  o->density = density;
-  return o;
+  struct polygon shape = *new_square(0.0, 0.0, width, color);
+  return object_new(shape);
 }
 
 void object_delete(struct object* o){
@@ -37,8 +37,17 @@ void object_reset_state(struct object* o) {
 size_t object_size(struct object* o){
   return sizeof(struct object)
        + polygon_size(&o->shape)
+       + polygon_container_size(&o->triangles)
        + matrix_size(&o->state)
        + matrix_size(&o->direction);
+}
+
+void object_triangulate(struct object* o) {
+  unsigned nTriangles = polygon_nVertices(&o->shape) - 3;
+  unsigned nEars;
+  polygon_container_reset(&o->triangles, nTriangles, 3);
+  ear_clipping(&o->shape, o->triangles.polygons, &nEars);
+  assert(nEars == nTriangles);
 }
 
 bool objects_collide(struct object* o1, struct object* o2) {

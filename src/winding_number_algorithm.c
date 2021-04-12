@@ -6,13 +6,13 @@ static inline int isLeft( double* P0, double* P1, double* P2 )
             - (P2[0] -  P0[0]) * (P1[1] - P0[1]) );
 }
 
-int wn_PnPoly( double* P, struct matrix* V, int n )
+int wn_PnPoly( double* P, struct matrix* V)
 {
     int    wn = 0;    // the  winding number counter
     int i1 = 0;
     int i2 = 0;
     // loop through all edges of the polygon
-    for (int i=0; i<n; i++) {   // edge from V[i] to  V[i+1]
+    for (int i=0; i<V->cols; i++) {   // edge from V[i] to  V[i+1]
       i1 = i % V->cols;
       i2 = (i + 1) % V->cols;
         if (matrix_value(V, 1, i1) <= P[1]) {          // start y <= P.y

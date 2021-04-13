@@ -76,3 +76,12 @@ bool is_an_ear(struct polygon* o, int i2) {
   }
   return true;
 }
+
+
+bool GJK(struct polygon* o1, struct polygon* o2) {
+}
+
+int support_function(struct polygon* o, struct matrix* direction) {
+  struct matrix dot_product = matrix_multiply(&o->vertices, direction);
+  return matrix_argmax(&dot_product);
+}

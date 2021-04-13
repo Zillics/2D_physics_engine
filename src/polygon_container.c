@@ -69,6 +69,12 @@ void polygon_container_pop(struct polygon_container* pc) {
   pc->nPolygons -= 1;
 }
 
+void polygon_container_set_color(struct polygon_container* pc, struct color color) {
+  for(unsigned i = 0; i < pc->nPolygons; i++) {
+    pc->polygons[i].color = color;
+  }
+}
+
 void polygon_container_render(struct polygon_container* pc, SDL_Renderer* renderer) {
   for(unsigned int i = 0; i < pc->nPolygons; i++) {
     polygon_render(pc->polygons + i, renderer);

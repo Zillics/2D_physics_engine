@@ -1,4 +1,5 @@
 #include "color.h"
+#include "utils.h"
 #include <stdio.h>
 
 struct color color_black() {
@@ -26,6 +27,15 @@ struct color color_white() {
   return white;
 }
 
+struct color color_gray() {
+  struct color gray = GRAY;
+  return gray;
+}
+
+struct color color_random() {
+  struct color random = { .r=random_int(0, 255), .g=random_int(0, 255), .b=random_int(0, 255) };
+  return random;
+}
 
 void color_print(struct color* clr) {
   printf("Color: %d %d %d\n", clr->r, clr->g, clr->b);

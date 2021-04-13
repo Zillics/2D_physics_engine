@@ -40,7 +40,7 @@ void arena_tick(struct arena* a, double dt) {
 
 void arena_render(struct arena* a, SDL_Renderer* renderer) {
   for(unsigned i = 0; i < a->objects.nObjects; i++) {
-    object_render(a->objects.objects + i, renderer);
+    object_render_all(a->objects.objects + i, renderer);
   }
   polygon_render(&a->border, renderer);
 }

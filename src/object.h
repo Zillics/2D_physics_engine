@@ -24,6 +24,7 @@ void object_delete(struct object* o);
 void object_reset_state(struct object* o);
 size_t object_size(struct object* o);
 void object_render(struct object* o, SDL_Renderer* renderer);
+void object_render_all(struct object* o, SDL_Renderer* renderer);
 void object_tick(struct object* o, double dt);
 bool objects_collide(struct object* o1, struct object* o2);
 void object_place(struct object* o, double x, double y);

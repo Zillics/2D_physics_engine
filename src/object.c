@@ -47,6 +47,7 @@ void object_triangulate(struct object* o) {
   unsigned nEars;
   polygon_container_reset(&o->triangles, nTriangles, 3);
   ear_clipping(&o->shape, o->triangles.polygons, &nEars);
+  polygon_container_set_color(&o->triangles, color_gray());
   assert(nEars == nTriangles);
 }
 
@@ -56,6 +57,13 @@ bool objects_collide(struct object* o1, struct object* o2) {
 
 void object_render(struct object* o, SDL_Renderer* renderer){
   polygon_render(&o->shape, renderer); 
+}
+
+void object_render_all(struct object* o, SDL_Renderer* renderer) {
+  polygon_render(&o->shape, renderer);
+  for(unsigned i = 0; i < o->triangles.nPolygons; i++) {
+    polygon_render(o->triangles.polygons + i, renderer);
+  }
 }
 
 void object_tick(struct object* o, double dt) {
@@ -78,16 +86,22 @@ void object_place(struct object* o, double x, double y) {
   double target_[3] = { x, y, 1.0 };
   struct matrix* target = vector_create(target_, 3);
   struct matrix move = matrix_subtract(target, &o->shape.centroid);
-  polygon_translate(&o->shape, move.data, 1.0);
+  object_translate(o, move.data, 1.0);
 }
 
 void object_translate(struct object* o, double* v, double k) {
   polygon_translate(&o->shape, v, k);
+  for(unsigned i = 0; i < o->triangles.nPolygons; i++) {
+    polygon_translate(o->triangles.polygons + i, v, k); 
+  }
 }
 
 void object_rotate(struct object* o, double deg) {
   polygon_rotate_deg(&o->shape, deg);
   matrix_rotate_deg(&o->direction, deg);
+  for(unsigned i = 0; i < o->triangles.nPolygons; i++) {
+    polygon_rotate_deg(o->triangles.polygons + i, deg);
+  }
 }
 
 double* object_pos(struct object* o) { return o->state.data + 0; }

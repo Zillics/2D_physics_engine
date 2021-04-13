@@ -36,5 +36,6 @@ double* object_acc(struct object* o);
 double* object_angle(struct object* o); 
 double* object_angvel(struct object* o); 
 double* object_angacc(struct object* o); 
+void object_print(struct object* o);
 #endif
 

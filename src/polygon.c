@@ -75,7 +75,7 @@ struct polygon* polygon_generate(unsigned N, double r) {
     vertices[i][0] = *(pi.data + 0);
     vertices[i][1] = *(pi.data + 1);
   }
-  struct color color = color_green();
+  struct color color = color_white();
   return polygon_new(N, vertices, color);
 }
 
@@ -306,21 +306,13 @@ void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
   unsigned N = polygon_nVertices(o);
   for(unsigned i1 = 0; i1 < N; i1++) {
     unsigned i2 = (i1 + 1) % N;
-    // Vertix
     polygon_render_vertex(o, renderer, i1);
-    // Normal
-    double x1 = matrix_value(&o->edge_midpoints, 0, i1);
-    double x2 = x1 + matrix_value(&o->edge_normals, 0, i1);
-    double y1 = matrix_value(&o->edge_midpoints, 1, i1);
-    double y2 = y1 + matrix_value(&o->edge_normals, 1, i1);
-    SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
   }
 
 }
 
 void polygon_render_vertex(struct polygon* o, SDL_Renderer* renderer, unsigned i1) {
   unsigned N = polygon_nVertices(o);
-  SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
   unsigned i2 = (i1 + 1) % N;
   SDL_RenderDrawLine(renderer, polygon_vertex(o, i1)[0], polygon_vertex(o, i1)[1], polygon_vertex(o, i2)[0], polygon_vertex(o, i2)[1]);
 }

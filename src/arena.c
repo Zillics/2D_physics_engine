@@ -24,7 +24,6 @@ void arena_tick(struct arena* a, double dt) {
     o = a->objects.objects + i;
     object_tick(o, dt);
     o->collides = false;
-    o->shape.color = color_green();
   }
   for(unsigned i = 0; i < N; i++) {
     o = a->objects.objects + i;
@@ -33,8 +32,6 @@ void arena_tick(struct arena* a, double dt) {
       if(objects_collide(o, o2)) {
         o->collides = true;
         o2->collides = true;
-        o->shape.color = color_red();
-        o2->shape.color = color_red();
       }
     }
   }

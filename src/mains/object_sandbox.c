@@ -20,9 +20,12 @@ struct color default_color = DEFAULT_COLOR;
 struct color selected_color = SELECTED_COLOR;
 struct color collision_color = COLLISION_COLOR;
 
+double nudge_vel = 0.001;
+double nudge_acc = 0.001;
+
 void spawn_object(double x, double y, struct arena* a) {
   struct object *o = object_generate(6, 100.0);
-  o->shape.color = default_color; 
+  o->shape.color = default_color;
   object_place(o, x, y);
   double maxVel = 0.0;
   double maxAngVel = 0.0;
@@ -88,12 +91,35 @@ int main(int argc, char* argv[])
                       case SDL_KEYDOWN:
                         switch(event.key.keysym.scancode) {
                           case SDL_SCANCODE_A:
-                            break;
+                            {
+                              if(selected) {
+                                object_vel(selected)[0] -= nudge_vel;
+                                break;
+                              }
+                            }
                           case SDL_SCANCODE_S:
+                            {
+                              if(selected) {
+                                object_vel(selected)[1] += nudge_vel;
+                                break;
+                              }
+                            }
                             break;
                           case SDL_SCANCODE_D:
+                            {
+                              if(selected) {
+                                object_vel(selected)[0] += nudge_vel;
+                                break;
+                              }
+                            }
                             break;
                           case SDL_SCANCODE_W:
+                            {
+                              if(selected) {
+                                object_vel(selected)[1] -= nudge_vel;
+                                break;
+                              }
+                            }
                             break;
                           default:
                             break;

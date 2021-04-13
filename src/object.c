@@ -96,3 +96,11 @@ double* object_acc(struct object* o) { return o->state.data + 4; }
 double* object_angle(struct object* o) { return o->state.data + 6; }
 double* object_angvel(struct object* o) { return o->state.data + 7; }
 double* object_angacc(struct object* o) { return o->state.data + 8; }
+
+void object_print(struct object* o) {
+  printf("OBJECT\n");
+  printf("shape:\n");
+  polygon_print(&o->shape);
+  printf("state:\n");
+  matrix_print(&o->state);
+}

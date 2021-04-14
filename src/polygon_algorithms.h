@@ -40,7 +40,22 @@ bool is_an_ear(struct polygon* o, int i);
 
 /** Gilbert–Johnson–Keerthi distance algorithm */
 bool GJK(struct polygon* o1, struct polygon* o2);
+bool handle_simplex(struct matrix* simplex[3], struct matrix* d);
+bool line_case(struct matrix* p1, struct matrix* p2, struct matrix* d);
+bool triangle_case(struct matrix* p1, struct matrix* p2, struct matrix* d);
 
-int support_function(struct polygon* o, struct matrix* direction);
+/** */
+struct matrix furthest_point(struct polygon* o, struct matrix* dir);
+struct matrix support_point(struct polygon* o1, struct polygon* o2, struct matrix* direction);
+
+/** Given point p1, p2 and direction vector d does 
+ * p2 lie on the other side of origin? */
+bool passes_origin(struct matrix* p1, struct matrix* p2);
+
+/** Given line segment through points p1 and p2,
+ * find the line's normal n directed towards origin. */
+struct matrix normal_towards_origin(struct matrix* p1, struct matrix* p2);
+
+struct matrix triple_cross_product(struct matrix* A, struct matrix* B, struct matrix* C);
 
 #endif

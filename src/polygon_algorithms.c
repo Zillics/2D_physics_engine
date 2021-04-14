@@ -79,9 +79,79 @@ bool is_an_ear(struct polygon* o, int i2) {
 
 
 bool GJK(struct polygon* o1, struct polygon* o2) {
+  // 1. Choose random direction and find support point p1 in that direction
+  struct matrix* simplex[3] = { NULL, NULL, NULL };
+  struct matrix d1 = matrix_subtract(&o2->centroid, &o1->centroid);
+  struct matrix p1 = support_point(o1, o2, &d1);
+  simplex[0] = &p1;
+  // 2. From p1, get direction towards origin
+  struct matrix d2 = matrix_multiply_scalar(&p1, -1);
+  while(true) {
+    // 3. Get support point of that direction
+    struct matrix p2 = support_point(o1, o2, &d2);
+    simplex[1] = &p2;
+    // CHECK: is p2 on other side of origin from p1?
+    if(!passes_origin(&p1, &p2)) {
+      return false;
+    }
+    // 4.
+    if(simplex[2] == NULL) {
+      // Line case
+      struct matrix v12 = matrix_subtract(simplex[1], simplex[0]);
+      struct matrix v1o = matrix_multiply_scalar(simplex[0], -1.0);
+      d2 = triple_cross_product(&v12, &v1o, &v12);
+    } else {
+      // Triangle case
+      struct matrix v12 = matrix_subtract(simplex[1], simplex[0]);
+      struct matrix v13 = matrix_subtract(simplex[2], simplex[0]);
+      struct matrix v1o = matrix_multiply_scalar(simplex[0], -1.0);
+      struct matrix n12 = triple_cross_product(&v13, &v12, &v12);
+      struct matrix n13 = triple_cross_product(&v12, &v13, &v13);
+      if(vector_dot(&v12, &v1o) > 0) {
+        matrix_delete(simplex[2]);
+        simplex[2] = NULL;
+        d2 = n12;
+      } else if(vector_dot(&v13, &v1o) > 0) {
+        matrix_delete(simplex[2]);
+        simplex[2] = NULL;
+        d2 = n13;
+      } else {
+        return true;
+      }
+    }
+  }
 }
 
-int support_function(struct polygon* o, struct matrix* direction) {
-  struct matrix dot_product = matrix_multiply(&o->vertices, direction);
-  return matrix_argmax(&dot_product);
+
+struct matrix furthest_point(struct polygon* o, struct matrix* dir) {
+  double largest_dot = vector_dot_raw(matrix_col_raw(&o->vertices, 0), dir->data, 2);
+  int idx = 0;
+  unsigned N = polygon_nVertices(o);
+  for(unsigned i = 1; i < N; i++) {
+    double tmp = vector_dot_raw(matrix_col_raw(&o->vertices, i), dir->data, 2);
+    if(tmp > largest_dot) {
+      largest_dot = tmp;
+      idx = i;
+    }
+  }
+  struct matrix* p = vector_create(matrix_col_raw(&o->vertices, idx), 2);
+  return *p;
 }
+
+struct matrix support_point(struct polygon* o1, struct polygon* o2, struct matrix* direction) {
+  struct matrix p1 = furthest_point(o1, direction);
+  struct matrix direction2 = matrix_multiply_scalar(direction, -1.0);
+  struct matrix p2 = furthest_point(o2, &direction2);
+  return matrix_subtract(&p1, &p2);
+}
+
+bool passes_origin(struct matrix* p1, struct matrix* p2) {
+  struct matrix d = matrix_multiply_scalar(p2, -1.0);
+  return vector_dot(p1, &d) > 0; 
+}
+
+struct matrix triple_cross_product(struct matrix* A, struct matrix* B, struct matrix* C) {
+  struct matrix AxB = matrix_cross_product(A, B);
+  return matrix_cross_product(&AxB, C);
+}
+

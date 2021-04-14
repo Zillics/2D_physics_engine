@@ -79,6 +79,12 @@ bool is_an_ear(struct polygon* o, int i2) {
 
 
 bool GJK(struct polygon* o1, struct polygon* o2) {
+  // 0. Initialize
+  struct matrix* v12 = matrix_new(2, 1, 0.0);
+  struct matrix* v13 = matrix_new(2, 1, 0.0);
+  struct matrix* v1o = matrix_new(2, 1, 0.0);
+  struct matrix* n12 = matrix_new(2, 1, 0.0);
+  struct matrix* n13 = matrix_new(2, 1, 0.0);
   // 1. Choose random direction and find support point p1 in that direction
   struct matrix* simplex[3] = { NULL, NULL, NULL };
   struct matrix d1 = matrix_subtract(&o2->centroid, &o1->centroid);
@@ -97,24 +103,24 @@ bool GJK(struct polygon* o1, struct polygon* o2) {
     // 4.
     if(simplex[2] == NULL) {
       // Line case
-      struct matrix v12 = matrix_subtract(simplex[1], simplex[0]);
-      struct matrix v1o = matrix_multiply_scalar(simplex[0], -1.0);
-      d2 = triple_cross_product(&v12, &v1o, &v12);
+      *v12 = matrix_subtract(simplex[1], simplex[0]);
+      *v1o = matrix_multiply_scalar(simplex[0], -1.0);
+      d2 = triple_cross_product(v12, v1o, v12);
     } else {
       // Triangle case
-      struct matrix v12 = matrix_subtract(simplex[1], simplex[0]);
-      struct matrix v13 = matrix_subtract(simplex[2], simplex[0]);
-      struct matrix v1o = matrix_multiply_scalar(simplex[0], -1.0);
-      struct matrix n12 = triple_cross_product(&v13, &v12, &v12);
-      struct matrix n13 = triple_cross_product(&v12, &v13, &v13);
-      if(vector_dot(&v12, &v1o) > 0) {
+      *v12 = matrix_subtract(simplex[1], simplex[0]);
+      *v13 = matrix_subtract(simplex[2], simplex[0]);
+      *v1o = matrix_multiply_scalar(simplex[0], -1.0);
+      *n12 = triple_cross_product(v13, v12, v12);
+      *n13 = triple_cross_product(v12, v13, v13);
+      if(vector_dot(v12, v1o) > 0) {
         matrix_delete(simplex[2]);
         simplex[2] = NULL;
-        d2 = n12;
-      } else if(vector_dot(&v13, &v1o) > 0) {
+        d2 = *n12;
+      } else if(vector_dot(v13, v1o) > 0) {
         matrix_delete(simplex[2]);
         simplex[2] = NULL;
-        d2 = n13;
+        d2 = *n13;
       } else {
         return true;
       }

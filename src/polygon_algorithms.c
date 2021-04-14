@@ -77,7 +77,6 @@ bool is_an_ear(struct polygon* o, int i2) {
   return true;
 }
 
-
 bool GJK(struct polygon* o1, struct polygon* o2) {
   // 0. Initialize
   struct matrix* v12 = matrix_new(2, 1, 0.0);

@@ -335,7 +335,7 @@ void polygon_print(struct polygon* o) {
 
 
 bool polygons_collide(struct polygon* o1, struct polygon* o2) {
-  return separated_axis_theorem(o1, o2);
+  return GJK(o1, o2);
 }
 
 double polygon_area(struct polygon* o) {

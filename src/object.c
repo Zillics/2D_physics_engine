@@ -52,10 +52,20 @@ void object_triangulate(struct object* o) {
 }
 
 bool objects_collide(struct object* o1, struct object* o2) {
-  return polygons_collide(&o1->shape, &o2->shape);
+  for(unsigned i = 0; i < o1->triangles.nPolygons; i++) {
+    for(unsigned j = 0; j < o2->triangles.nPolygons; j++) {
+      if(polygons_collide(o1->triangles.polygons + i, o2->triangles.polygons + j)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void object_render(struct object* o, SDL_Renderer* renderer){
+  if(o->collides) {
+    o->shape.color = color_red();
+  }
   polygon_render(&o->shape, renderer); 
 }
 

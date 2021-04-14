@@ -17,8 +17,8 @@ struct object* object_generate(unsigned nPoints, double r) {
   return object_new(shape);
 }
 
-struct object* new_square_object(double width, struct color color, double density) {
-  struct polygon shape = *new_square(0.0, 0.0, width, color);
+struct object* new_square_object(double width, double density) {
+  struct polygon shape = *new_square(0.0, 0.0, width);
   return object_new(shape);
 }
 
@@ -47,7 +47,6 @@ void object_triangulate(struct object* o) {
   unsigned nEars;
   polygon_container_reset(&o->triangles, nTriangles, 3);
   ear_clipping(&o->shape, o->triangles.polygons, &nEars);
-  polygon_container_set_color(&o->triangles, color_gray());
   assert(nEars == nTriangles);
 }
 
@@ -63,14 +62,20 @@ bool objects_collide(struct object* o1, struct object* o2) {
 }
 
 void object_render(struct object* o, SDL_Renderer* renderer){
-  if(o->collides) {
-    o->shape.color = color_red();
-  }
   polygon_render(&o->shape, renderer); 
 }
 
 void object_render_all(struct object* o, SDL_Renderer* renderer) {
+  struct color clr;
+  if(o->collides) {
+    clr = color_red();
+  } else {
+    clr = color_green();
+  }
+  SDL_SetRenderDrawColor(renderer, clr.r, clr.g, clr.b, SDL_ALPHA_OPAQUE);
   polygon_render(&o->shape, renderer);
+  struct color gray = color_gray();
+  SDL_SetRenderDrawColor(renderer, gray.r, gray.g, gray.b, SDL_ALPHA_OPAQUE);
   for(unsigned i = 0; i < o->triangles.nPolygons; i++) {
     polygon_render(o->triangles.polygons + i, renderer);
   }

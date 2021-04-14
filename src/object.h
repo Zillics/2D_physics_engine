@@ -15,11 +15,12 @@ struct object {
   /** x, y, dx, dy, ddx, ddy, a, da, dda */
   struct matrix state;
   struct matrix direction;
+  struct color color;
 };
 
 struct object* object_new(struct polygon poly);
 struct object* object_generate(unsigned nPoints, double r);
-struct object* new_square_object(double width, struct color color, double mass);
+struct object* new_square_object(double width, double mass);
 void object_delete(struct object* o);
 void object_reset_state(struct object* o);
 size_t object_size(struct object* o);

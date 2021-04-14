@@ -5,16 +5,16 @@
 #include "winding_number_algorithm.h"
 #include "polygon_algorithms.h"
 
-struct polygon* new_square(int x, int y, unsigned width, struct color color) {
+struct polygon* new_square(int x, int y, unsigned width) {
   double vertices[4][2] = { {x - 0.5 * width, y + 0.5 * width},
                           {x + 0.5 * width, y + 0.5 * width},
                           {x + 0.5 * width, y - 0.5 * width},
                           {x - 0.5 * width, y - 0.5 * width} };
-  struct polygon* ret = polygon_new(4, vertices, color);
+  struct polygon* ret = polygon_new(4, vertices);
   return ret;
 }
 
-struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], struct color color) {
+struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2]) {
   struct polygon* o = malloc(sizeof(struct polygon));
   o->vertices = *matrix_new(3, nVertices, 0.0);
   for(unsigned i = 0; i < nVertices; i++) {
@@ -26,7 +26,6 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2], s
   bool inward = false;
   polygon_recompute_edge_normals(o, inward);
   polygon_recompute_edge_midpoints(o);
-  o->color = color;
   struct matrix* c = vector_new(3, 1.0);
   polygon_centroid(o, vector_element(c, 0), vector_element(c, 1));
   o->centroid = *c;
@@ -41,7 +40,7 @@ struct polygon* polygon_copy(struct polygon* o) {
     vertices[i][0] = polygon_vertex(o, i)[0];
     vertices[i][1] = polygon_vertex(o, i)[1];
   }
-  return polygon_new(nVertices, vertices, o->color);
+  return polygon_new(nVertices, vertices);
 }
 
 struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsigned* vertex_idx) {
@@ -51,7 +50,7 @@ struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsign
     vertices[i][0] = polygon_vertex(o, vi)[0];
     vertices[i][1] = polygon_vertex(o, vi)[1];
   }
-  return polygon_new(nVertices, vertices, o->color);
+  return polygon_new(nVertices, vertices);
 }
 
 struct polygon* polygon_generate(unsigned N, double r) {
@@ -75,8 +74,7 @@ struct polygon* polygon_generate(unsigned N, double r) {
     vertices[i][0] = *(pi.data + 0);
     vertices[i][1] = *(pi.data + 1);
   }
-  struct color color = color_white();
-  return polygon_new(N, vertices, color);
+  return polygon_new(N, vertices);
 }
 
 void polygon_delete(struct polygon* o) {
@@ -302,7 +300,6 @@ void polygon_translate(struct polygon* o, double* v, double k) {
 }
 
 void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
-  SDL_SetRenderDrawColor(renderer, o->color.r, o->color.g, o->color.b, SDL_ALPHA_OPAQUE);
   unsigned N = polygon_nVertices(o);
   for(unsigned i1 = 0; i1 < N; i1++) {
     unsigned i2 = (i1 + 1) % N;
@@ -329,7 +326,6 @@ void polygon_print(struct polygon* o) {
   for(unsigned i = 0; i < polygon_nVertices(o); i++) {
     printf("\t(%f, %f)\n", polygon_vertex(o, i)[0], polygon_vertex(o, i)[1]);
   }
-  color_print(&o->color);
   printf("-----------------------------\n");
 }
 

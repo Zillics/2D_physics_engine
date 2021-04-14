@@ -5,7 +5,6 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
-#include "color.h"
 #include "linear_algebra.h"
 
 /** Polygon with clock-wise ordered vertices. */
@@ -16,11 +15,10 @@ struct polygon {
   struct matrix centroid;
   bool edge_normals_inward;
   double area;
-  struct color color;
 };
 
-struct polygon* new_square(int x, int y, unsigned width, struct color color);
-struct polygon* polygon_new(unsigned nVertices, double vertices[2][nVertices], struct color color);
+struct polygon* new_square(int x, int y, unsigned width);
+struct polygon* polygon_new(unsigned nVertices, double vertices[2][nVertices]);
 struct polygon* polygon_copy(struct polygon* o);
 struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsigned* vertix_idx);
 /** Randomly generate a simple polygon of N vertices. */

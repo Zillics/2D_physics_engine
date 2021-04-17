@@ -1,6 +1,8 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <SDL2/SDL.h>
+
 struct color {
   unsigned char r;
   unsigned char g;
@@ -16,6 +18,8 @@ struct color color_gray();
 struct color color_random();
 
 void color_print(struct color* clr);
+
+void color_render(struct color* clr, SDL_Renderer* renderer);
 
 #define RED { .r=255, .g=0, .b=0 }
 #define GREEN { .r=0, .g=255, .b=0 }

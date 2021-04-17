@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
                               if(o) {
                                 polygon_delete(o);
                               }
-                              struct polygon* temp = polygon_new(nVertices, vertices, color);
+                              struct polygon* temp = polygon_new(nVertices, vertices);
                               if(polygon_self_intersects(temp)) { 
                                 printf("Polygon self intersects -> not simple! Only simple polygons accepted\n");
                                 o = NULL;

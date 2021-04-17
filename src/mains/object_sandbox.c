@@ -25,7 +25,6 @@ double nudge_acc = 0.001;
 
 void spawn_object(double x, double y, struct arena* a) {
   struct object *o = object_generate(6, 100.0);
-  o->shape.color = default_color;
   object_place(o, x, y);
   double maxVel = 0.0;
   double maxAngVel = 0.0;
@@ -35,6 +34,7 @@ void spawn_object(double x, double y, struct arena* a) {
   struct matrix* max = vector_create(max_, 9);
   struct matrix* state = vector_generate(min, max);
   //o->state = *state;
+  o->color = color_green();
   object_container_append(&a->objects, o);
   matrix_delete(min);
   matrix_delete(max);
@@ -71,9 +71,9 @@ int main(int argc, char* argv[])
                               struct object* tmp = arena_find_object_at(a, event.button.x, event.button.y);
                               if(tmp) {
                                 if(selected) {
-                                  selected->shape.color = default_color;
+                                  tmp->color = color_white();
+                                  selected->color = color_green();
                                 }
-                                tmp->shape.color = selected_color;
                                 selected = tmp;
                                 tmp = NULL;
                               }

@@ -1,4 +1,3 @@
-#include "color.h"
 #include "polygon_container.h"
 #include "utils.h"
 
@@ -35,8 +34,7 @@ void polygon_container_reset(struct polygon_container* pc, unsigned nPolygons, u
   }
   for(unsigned i = 0; i < nPolygons; i++) {
     double vertices[2][nVertices];
-    struct color color = color_red();
-    struct polygon* o = polygon_new(nVertices, vertices, color);
+    struct polygon* o = polygon_new(nVertices, vertices);
     polygon_container_append(pc, o);
   }
 }
@@ -67,12 +65,6 @@ void polygon_container_pop(struct polygon_container* pc) {
   pc->polygons = realloc(pc->polygons, pc->mem_polygons - size); 
   pc->mem_polygons -= size;
   pc->nPolygons -= 1;
-}
-
-void polygon_container_set_color(struct polygon_container* pc, struct color color) {
-  for(unsigned i = 0; i < pc->nPolygons; i++) {
-    pc->polygons[i].color = color;
-  }
 }
 
 void polygon_container_render(struct polygon_container* pc, SDL_Renderer* renderer) {

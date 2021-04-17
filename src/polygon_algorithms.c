@@ -79,28 +79,34 @@ bool is_an_ear(struct polygon* o, int i2) {
 
 bool GJK(struct polygon* o1, struct polygon* o2) {
   // 0. Initialize
-  struct matrix* v12 = matrix_new(2, 1, 0.0);
-  struct matrix* v13 = matrix_new(2, 1, 0.0);
-  struct matrix* v1o = matrix_new(2, 1, 0.0);
-  struct matrix* n12 = matrix_new(2, 1, 0.0);
-  struct matrix* n13 = matrix_new(2, 1, 0.0);
+  struct matrix* v12 = vector_new(2, 0.0);
+  struct matrix* v13 = vector_new(2, 0.0);
+  struct matrix* v1o = vector_new(2, 0.0);
+  struct matrix* n12 = vector_new(2, 0.0);
+  struct matrix* n13 = vector_new(2, 0.0);
+  struct matrix* p1 = vector_new(2, 0.0);
+  struct matrix* p2 = vector_new(2, 0.0);
+  struct matrix* p3 = vector_new(2, 0.0);
+  struct matrix* simplex[3] = { p1, p2, p3 };
+  unsigned n = 0;
+  unsigned i = 0;
+  unsigned max_iterations = 100;
   // 1. Choose random direction and find support point p1 in that direction
-  struct matrix* simplex[3] = { NULL, NULL, NULL };
   struct matrix d1 = matrix_subtract(&o2->centroid, &o1->centroid);
-  struct matrix p1 = support_point(o1, o2, &d1);
-  simplex[0] = &p1;
+  *simplex[0] = support_point(o1, o2, &d1);
+  n += 1;
   // 2. From p1, get direction towards origin
-  struct matrix d2 = matrix_multiply_scalar(&p1, -1);
-  while(true) {
+  struct matrix d2 = matrix_multiply_scalar(p1, -1);
+  while(i < max_iterations) {
     // 3. Get support point of that direction
-    struct matrix p2 = support_point(o1, o2, &d2);
-    simplex[1] = &p2;
+    *simplex[n] = support_point(o1, o2, &d2);
+    n += 1;
     // CHECK: is p2 on other side of origin from p1?
-    if(!passes_origin(&p1, &p2)) {
+    if(!passes_origin(p1, p2)) {
       return false;
     }
     // 4.
-    if(simplex[2] == NULL) {
+    if(n == 2) {
       // Line case
       *v12 = matrix_subtract(simplex[1], simplex[0]);
       *v1o = matrix_multiply_scalar(simplex[0], -1.0);
@@ -114,17 +120,20 @@ bool GJK(struct polygon* o1, struct polygon* o2) {
       *n13 = triple_cross_product(v12, v13, v13);
       if(vector_dot(v12, v1o) > 0) {
         matrix_delete(simplex[2]);
-        simplex[2] = NULL;
+        n -= 1;
         d2 = *n12;
       } else if(vector_dot(v13, v1o) > 0) {
         matrix_delete(simplex[2]);
-        simplex[2] = NULL;
+        n -= 1;
         d2 = *n13;
       } else {
         return true;
       }
     }
+    i += 1;
   }
+  printf("AAARGH\n");
+  return false;
 }
 
 

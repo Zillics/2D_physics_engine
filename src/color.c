@@ -37,6 +37,10 @@ struct color color_random() {
   return random;
 }
 
+void color_render(struct color* clr, SDL_Renderer* renderer) {
+  SDL_SetRenderDrawColor(renderer, clr->r, clr->g, clr->b, SDL_ALPHA_OPAQUE);
+}
+
 void color_print(struct color* clr) {
   printf("Color: %d %d %d\n", clr->r, clr->g, clr->b);
 }

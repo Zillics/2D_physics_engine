@@ -61,6 +61,7 @@ double vector_dot(struct matrix* a, struct matrix* b);
 double vector_dot_raw(double* a, double* b, unsigned N);
 /** proj_b a, or projection of vector a on vector b */
 struct matrix vector_projection(struct matrix* a, struct matrix* b);
+struct matrix vector_normalize(struct matrix* v);
 double vector_cross_2D(struct matrix* a, struct matrix* b);
 double vector_cross_2D_raw(double* a, double* b);
 double vector_angle_180(struct matrix* v1, struct matrix* v2);

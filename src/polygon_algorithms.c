@@ -79,53 +79,68 @@ bool is_an_ear(struct polygon* o, int i2) {
 
 bool GJK(struct polygon* o1, struct polygon* o2) {
   // 0. Initialize
-  struct matrix* v12 = vector_new(2, 0.0);
-  struct matrix* v13 = vector_new(2, 0.0);
-  struct matrix* v1o = vector_new(2, 0.0);
-  struct matrix* n12 = vector_new(2, 0.0);
-  struct matrix* n13 = vector_new(2, 0.0);
-  struct matrix* p1 = vector_new(2, 0.0);
-  struct matrix* p2 = vector_new(2, 0.0);
-  struct matrix* p3 = vector_new(2, 0.0);
+  struct matrix* v12 = vector_new(3, 0.0);
+  struct matrix* v13 = vector_new(3, 0.0);
+  struct matrix* v1o = vector_new(3, 0.0);
+  struct matrix* n12 = vector_new(3, 0.0);
+  struct matrix* n13 = vector_new(3, 0.0);
+  struct matrix* n32 = vector_new(3, 0.0);
+  struct matrix* n31 = vector_new(3, 0.0);
+  struct matrix* v32 = vector_new(3, 0.0);
+  struct matrix* v31 = vector_new(3, 0.0);
+  struct matrix* v3o = vector_new(3, 0.0);
+  struct matrix* p1 = vector_new(3, 0.0);
+  struct matrix* p2 = vector_new(3, 0.0);
+  struct matrix* p3 = vector_new(3, 0.0);
   struct matrix* simplex[3] = { p1, p2, p3 };
   unsigned n = 0;
   unsigned i = 0;
   unsigned max_iterations = 100;
   // 1. Choose random direction and find support point p1 in that direction
   struct matrix d1 = matrix_subtract(&o2->centroid, &o1->centroid);
+  d1 = vector_normalize(&d1);
   *simplex[0] = support_point(o1, o2, &d1);
+  *simplex[0] = vector_normalize(simplex[0]);
   n += 1;
   // 2. From p1, get direction towards origin
-  struct matrix d2 = matrix_multiply_scalar(p1, -1);
+  struct matrix d2 = matrix_multiply_scalar(simplex[0], -1);
+  d2 = vector_normalize(&d2);
   while(i < max_iterations) {
     // 3. Get support point of that direction
     *simplex[n] = support_point(o1, o2, &d2);
-    n += 1;
+    *simplex[n] = vector_normalize(simplex[n]);
     // CHECK: is p2 on other side of origin from p1?
-    if(!passes_origin(p1, p2)) {
+    if(vector_dot(simplex[n], &d2) < 0) {
       return false;
     }
+    n += 1;
     // 4.
     if(n == 2) {
       // Line case
       *v12 = matrix_subtract(simplex[1], simplex[0]);
+      *v12 = vector_normalize(v12);
       *v1o = matrix_multiply_scalar(simplex[0], -1.0);
+      *v1o = vector_normalize(v1o);
       d2 = triple_cross_product(v12, v1o, v12);
+      d2 = vector_normalize(&d2);
     } else {
       // Triangle case
-      *v12 = matrix_subtract(simplex[1], simplex[0]);
-      *v13 = matrix_subtract(simplex[2], simplex[0]);
-      *v1o = matrix_multiply_scalar(simplex[0], -1.0);
-      *n12 = triple_cross_product(v13, v12, v12);
-      *n13 = triple_cross_product(v12, v13, v13);
-      if(vector_dot(v12, v1o) > 0) {
-        matrix_delete(simplex[2]);
+      *v32 = matrix_subtract(simplex[1], simplex[2]);
+      *v32 = vector_normalize(v32);
+      *v31 = matrix_subtract(simplex[0], simplex[2]);
+      *v31 = vector_normalize(v31);
+      *v3o = matrix_multiply_scalar(simplex[2], -1.0);
+      *v3o = vector_normalize(v3o);
+      *n32 = triple_cross_product(v31, v32, v32);
+      *n32 = vector_normalize(n32);
+      *n31 = triple_cross_product(v32, v31, v31);
+      *n31 = vector_normalize(n31);
+      if(vector_dot(n32, v3o) > 0) {
         n -= 1;
-        d2 = *n12;
-      } else if(vector_dot(v13, v1o) > 0) {
-        matrix_delete(simplex[2]);
+        d2 = *v32;
+      } else if(vector_dot(n31, v3o) > 0) {
         n -= 1;
-        d2 = *n13;
+        d2 = *n31;
       } else {
         return true;
       }
@@ -138,17 +153,17 @@ bool GJK(struct polygon* o1, struct polygon* o2) {
 
 
 struct matrix furthest_point(struct polygon* o, struct matrix* dir) {
-  double largest_dot = vector_dot_raw(matrix_col_raw(&o->vertices, 0), dir->data, 2);
+  double largest_dot = vector_dot_raw(matrix_col_raw(&o->vertices, 0), dir->data, 3);
   int idx = 0;
   unsigned N = polygon_nVertices(o);
   for(unsigned i = 1; i < N; i++) {
-    double tmp = vector_dot_raw(matrix_col_raw(&o->vertices, i), dir->data, 2);
+    double tmp = vector_dot_raw(matrix_col_raw(&o->vertices, i), dir->data, 3);
     if(tmp > largest_dot) {
       largest_dot = tmp;
       idx = i;
     }
   }
-  struct matrix* p = vector_create(matrix_col_raw(&o->vertices, idx), 2);
+  struct matrix* p = vector_create(matrix_col_raw(&o->vertices, idx), 3);
   return *p;
 }
 

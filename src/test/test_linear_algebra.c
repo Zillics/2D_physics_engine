@@ -105,12 +105,10 @@
   END_TEST
 
   START_TEST (test_cross_product) {
-    struct matrix* a = matrix_new(3, 1, 0);
-    struct matrix* b = matrix_new(3, 1, 0);
     double a_data[3] = { 2.0, 4.5, 1.24 };
     double b_data[3] = { -1.32, 5.0, 2.22 };
-    matrix_insert_col(a, a_data, 0);
-    matrix_insert_col(b, b_data, 0);
+    struct matrix* a = vector_create(a_data, 3);
+    struct matrix* b = vector_create(b_data, 3);
     struct matrix axb = matrix_cross_product(a, b);
     ck_assert_double_eq_tol(matrix_value(&axb, 0, 0), 3.79, 1e-6); 
     ck_assert_double_eq_tol(matrix_value(&axb, 1, 0), -6.0768, 1e-6); 

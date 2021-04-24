@@ -1,4 +1,6 @@
 #include "polygon_machine.h"
+#include "polygon_algorithms.h"
+#include "utils.h"
 
 
 struct polygon_machine* polygon_machine_new() {
@@ -11,6 +13,8 @@ struct polygon_machine* polygon_machine_new() {
   self->background_color = color_black();
   self->default_color = color_green();
   self->selected_color = color_white();
+  self->marker_color = color_red();
+  self->vector_color = color_blue();
   polygon_machine_reset(self);
   return self;
 }
@@ -39,8 +43,10 @@ void polygon_machine_reset(struct polygon_machine* self) {
   self->selected[0] = -1;
   self->selected[1] = -1;
   polygon_container_resize(&self->polygons, 0);
-  self->mode = GENERATE;
+  self->mode = DRAW;
   self->n_draw_vertices = 0;
+  self->n_draw_vector_points = 0;
+  self->vector_drawn = false;
 }
 
 void polygon_machine_render(struct polygon_machine* self) {
@@ -65,6 +71,23 @@ void polygon_machine_render(struct polygon_machine* self) {
   for(unsigned i = 0; i < self->n_draw_vertices; i++) {
     color_render(&self->default_color, self->renderer);
     SDL_RenderDrawPoint(self->renderer, self->draw_vertices[i][0], self->draw_vertices[i][1]);
+  }
+
+  if(!self->vector_drawn) {
+    for(unsigned i = 0; i < self->n_draw_vector_points; i++) {
+      color_render(&self->default_color, self->renderer);
+      SDL_RenderDrawPoint(self->renderer, self->draw_vector[i][0], self->draw_vector[i][1]);
+    }
+  }
+  if(self->vector_drawn && self->n_draw_vector_points == 2) {
+    color_render(&self->vector_color, self->renderer);
+    SDL_RenderDrawLine(self->renderer, self->draw_vector[0][0], self->draw_vector[0][1], self->draw_vector[1][0], self->draw_vector[1][1]);
+  }
+
+  // Render all markers
+  for(unsigned i = 0; i < self->n_markers; i++) {
+    color_render(&self->marker_color, self->renderer);
+    SDL_RenderDrawPoint(self->renderer, self->markers[i][0], self->markers[i][1]);
   }
 
   // Display all rendered stuff
@@ -148,6 +171,15 @@ void polygon_machine_handle_left_click(struct polygon_machine* self, SDL_Event* 
       }
       break;
     }
+    case DRAW_VECTOR:
+    {
+      self->iVectorpoint = (self->iVectorpoint + 1) % 2;
+      self->draw_vector[self->iVectorpoint][0] = event->button.x;
+      self->draw_vector[self->iVectorpoint][1] = event->button.y;
+      self->n_draw_vector_points = imax(self->n_draw_vector_points + 1, 2);
+      self->vector_drawn = self->n_draw_vector_points == 2;
+      break;
+    }
   }
 }
 
@@ -186,6 +218,10 @@ void polygon_machine_handle_right_click(struct polygon_machine* self, SDL_Event*
       }
       break;
     }
+    case DRAW_VECTOR:
+    {
+      break;
+    }
   }
 }
 
@@ -209,9 +245,52 @@ void polygon_machine_handle_key_down(struct polygon_machine* self, SDL_Event* ev
       self->n_draw_vertices = 0;
       break;
     }
+    case SDL_SCANCODE_4:
+    {
+      self->mode = DRAW_VECTOR;
+      self->n_draw_vertices = 0;
+      self->n_draw_vector_points = 0;
+      self->vector_drawn = false;
+      break;
+    }
     case SDL_SCANCODE_ESCAPE:
     {
       polygon_machine_reset(self);
+      break;
+    }
+    case SDL_SCANCODE_Q:
+    {
+      if(self->selected[0] >= 0) {
+        polygon_print(self->polygons.polygons + self->selected[0]);
+      }
+      if(self->selected[1] >= 0) {
+        polygon_print(self->polygons.polygons + self->selected[1]);
+      }
+      break;
+    }
+    case SDL_SCANCODE_W:
+    {
+      struct polygon* poly1 = polygon_machine_selected(self, 0);
+      struct polygon* poly2 = polygon_machine_selected(self, 1);
+      if(poly1 != NULL && poly2 != NULL) {
+        bool collide = polygons_collide(poly1, poly2);
+        if(collide) {
+          printf("POLYGONS COLLIDE!\n");
+        } else {
+          printf("POLYGONS DO NOT COLLIDE!\n");
+        }
+      }
+      break;
+    }
+    case SDL_SCANCODE_E:
+    {
+      struct polygon* poly = polygon_machine_selected(self, 0);
+      if(poly != NULL) {
+        self->n_markers = 0;
+        struct matrix dir = vector_subtract_raw(self->draw_vector[0], self->draw_vector[1], 2);
+        struct matrix p = furthest_point(poly, &dir);
+        polygon_machine_add_marker(self, vector_value(&p, 0), vector_value(&p, 1));
+      }
       break;
     }
     default:
@@ -219,7 +298,22 @@ void polygon_machine_handle_key_down(struct polygon_machine* self, SDL_Event* ev
   }
 }
 
+struct polygon* polygon_machine_selected(struct polygon_machine* self, int i) {
+  if(self->selected[i] >= 0 && self->polygons.nPolygons > i) {
+    return self->polygons.polygons + self->selected[i];
+  }
+  return NULL;
+}
 
 bool polygon_machine_is_selected(struct polygon_machine* self, int i) {
   return self->selected[0] == i || self->selected[1] == i;
+}
+
+void polygon_machine_add_marker(struct polygon_machine* self, double x, double y) {
+  if(self->n_markers > MAX_MARKERS) {
+    return;
+  }
+  self->markers[self->n_markers][0] = x;
+  self->markers[self->n_markers][1] = y;
+  self->n_markers += 1;
 }

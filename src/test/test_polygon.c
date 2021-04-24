@@ -29,13 +29,12 @@ START_TEST(test_triangle_area) {
 END_TEST
 
 START_TEST(test_polygon_area) {
-  struct color color = { .r=255, .g=255, .b=255 };
   // 10 * 2 square
   double p[4][2] = {{0.0, 2.0},
                     {10.0, 2.0},
                     {10.0, 0.0},
                     {0.0, 0.0}};
-  struct polygon* o = polygon_new(4, p, color);
+  struct polygon* o = polygon_new(4, p);
   double A_act = 10.0 * 2.0;
   double A = polygon_area(o);
   ck_assert_double_eq_tol(A, A_act, 1e-6);
@@ -52,12 +51,11 @@ START_TEST(test_polygon_area) {
 END_TEST
 
 START_TEST(test_polygon_inertia) {
-  struct color color = { .r=255, .g=255, .b=255 };
   // 10 * 2 square
   double p[3][2] = {{0.0, 0.0},
                     {4.0, 3.5},
                     {2.5, 0.0}};
-  struct polygon* o = polygon_new(4, p, color);
+  struct polygon* o = polygon_new(4, p);
   double A_act = 10.0 * 2.0;
   double A = polygon_area(o);
   ck_assert_double_eq_tol(A, A_act, 1e-6);
@@ -102,7 +100,7 @@ START_TEST(test_create_sub) {
 
 
 START_TEST(test_edge_angle) {
-  struct polygon* square = new_square(50, 50, 19, color_black());
+  struct polygon* square = new_square(50, 50, 19);
   ck_assert_double_eq_tol(polygon_edge_angle(square, 0, 1), 0.5 * M_PI, 1e-4); 
   ck_assert_double_eq_tol(polygon_edge_angle(square, 1, 2), 0.5 * M_PI, 1e-4); 
   ck_assert_double_eq_tol(polygon_edge_angle(square, 2, 3), 0.5 * M_PI, 1e-4); 

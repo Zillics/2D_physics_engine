@@ -495,6 +495,11 @@ struct matrix vector_projection(struct matrix* a, struct matrix* b) {
   return matrix_multiply_scalar(b, ab/bb);
 }
 
+struct matrix vector_normalize(struct matrix* v) {
+  double k = 1 / vector_norm_L2(v);
+  return matrix_multiply_scalar(v, k);
+}
+
 double vector_distance(struct matrix* v1, struct matrix* v2) {
   assert(matrix_is_vector(v1));
   assert(matrix_is_vector(v2));

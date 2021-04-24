@@ -40,8 +40,8 @@ void polygon_container_reset(struct polygon_container* pc, unsigned nPolygons, u
 }
 
 void polygon_container_resize(struct polygon_container* pc, unsigned nPolygons) {
-  unsigned nPop = imax(0, (int)pc->nPolygons - (int)nPolygons);
-  for(unsigned i = 0; i < nPop; i++) {
+  int nPop = (int)pc->nPolygons - (int)nPolygons;
+  for(int i = 0; i < nPop; i++) {
     polygon_container_pop(pc);
   }
 }

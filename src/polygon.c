@@ -299,6 +299,11 @@ void polygon_translate(struct polygon* o, double* v, double k) {
   o->centroid = matrix_multiply(&T, &o->centroid);
 }
 
+void polygon_place(struct polygon* o, double x, double y) {
+  double target[3] = { x, y, 1.0 };
+  polygon_translate(o, target, 1.0);
+}
+
 void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
   unsigned N = polygon_nVertices(o);
   for(unsigned i1 = 0; i1 < N; i1++) {

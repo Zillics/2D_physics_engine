@@ -52,6 +52,7 @@ void polygon_centroid(struct polygon* o, double* x, double* y);
 bool polygon_contains(struct polygon* o, double* p);
 void polygon_rotate(struct polygon* o, double deg);
 void polygon_translate(struct polygon* o, double* v, double k);
+void polygon_place(struct polygon* o, double x, double y);
 void polygon_rotate_rad(struct polygon* o, double rad);
 void polygon_rotate_deg(struct polygon* o, double deg);
 bool polygon_is_convex(struct polygon* o);

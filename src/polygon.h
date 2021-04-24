@@ -18,7 +18,7 @@ struct polygon {
 };
 
 struct polygon* new_square(int x, int y, unsigned width);
-struct polygon* polygon_new(unsigned nVertices, double vertices[2][nVertices]);
+struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2]);
 struct polygon* polygon_copy(struct polygon* o);
 struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsigned* vertix_idx);
 /** Randomly generate a simple polygon of N vertices. */
@@ -26,10 +26,12 @@ struct polygon* polygon_generate(unsigned N, double r);
 size_t polygon_size(struct polygon* o);
 void polygon_delete(struct polygon* o);
 void polygon_remove_vertex(struct polygon* p, unsigned i);
+void polygon_insert_vertex(struct polygon* p, double* v, unsigned i);
 void polygon_render(struct polygon* o, SDL_Renderer* renderer);
 void polygon_render_vertex(struct polygon* o, SDL_Renderer* renderer, unsigned i1);
 unsigned polygon_nVertices(struct polygon* o);
-double* polygon_vertex(struct polygon* o, unsigned i);
+struct matrix polygon_vertex(struct polygon* o, unsigned i);
+double* polygon_vertex_raw(struct polygon* o, unsigned i);
 void polygon_edge_raw(struct polygon* o, unsigned i, double* p1, double* p2);
 struct matrix polygon_edge(struct polygon* o, unsigned i);
 /** 
@@ -64,6 +66,7 @@ bool vertices_clockwise(struct matrix* verts);
 void polygon_vertex_normals(struct polygon* o, bool inward, struct matrix* n, struct matrix* c);
 void polygon_print(struct polygon* o);
 bool polygons_collide(struct polygon* o1, struct polygon* o2);
+bool polygons_collide_penetration(struct polygon* o1, struct polygon* o2, struct matrix* penetration);
 double polygon_area(struct polygon* o);
 /** Compute polygon moment of inertia, given density ro. */
 double polygon_moment_of_inertia(struct polygon* o, double ro);

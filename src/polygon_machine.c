@@ -230,25 +230,21 @@ void polygon_machine_handle_key_down(struct polygon_machine* self, SDL_Event* ev
     case SDL_SCANCODE_1:
     {
       self->mode = DRAW;
-      self->n_draw_vertices = 0;
       break;
     }
     case SDL_SCANCODE_2:
     {
       self->mode = GENERATE;
-      self->n_draw_vertices = 0;
       break;
     }
     case SDL_SCANCODE_3:
     {
       self->mode = SELECT;
-      self->n_draw_vertices = 0;
       break;
     }
     case SDL_SCANCODE_4:
     {
       self->mode = DRAW_VECTOR;
-      self->n_draw_vertices = 0;
       self->n_draw_vector_points = 0;
       self->vector_drawn = false;
       break;
@@ -290,6 +286,33 @@ void polygon_machine_handle_key_down(struct polygon_machine* self, SDL_Event* ev
         struct matrix dir = vector_subtract_raw(self->draw_vector[0], self->draw_vector[1], 2);
         struct matrix p = furthest_point(poly, &dir);
         polygon_machine_add_marker(self, vector_value(&p, 0), vector_value(&p, 1));
+      }
+      break;
+    }
+    case SDL_SCANCODE_R:
+    {
+      struct polygon* poly1 = polygon_machine_selected(self, 0);
+      struct polygon* poly2 = polygon_machine_selected(self, 1);
+      struct matrix* penetration = vector_new(2, 0.0);
+      if(poly1 != NULL && poly2 != NULL) {
+        bool collide = polygons_collide_penetration(poly1, poly2, penetration);
+        if(collide) {
+          printf("POLYGONS COLLIDE!\n");
+          polygon_translate(poly1, penetration->data, -1.0);
+          matrix_print(penetration);
+        } else {
+          printf("POLYGONS DO NOT COLLIDE!\n");
+        }
+      }
+      break;
+    }
+    case SDL_SCANCODE_T:
+    {
+      struct polygon* poly1 = polygon_machine_selected(self, 0);
+      if(poly1 != NULL) {
+        if(self->n_draw_vertices > 0) {
+          polygon_insert_vertex(poly1, self->draw_vertices[self->n_draw_vertices - 1], polygon_nVertices(poly1));
+        }
       }
       break;
     }

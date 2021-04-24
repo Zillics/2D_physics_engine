@@ -2,6 +2,8 @@
 #include "winding_number_algorithm.h"
 #include "utils.h"
 
+#define EPA_MAX_VERTICES 100
+
 bool polygon_axes_overlap(struct polygon* o1, struct polygon* o2) {
     for(unsigned axis = 0; axis < polygon_nVertices(o1); axis++) {
       // 1. Compute normal of current vertix
@@ -62,22 +64,22 @@ bool is_an_ear(struct polygon* o, int i2) {
   if(angle > M_PI) {
     return false;
   }
-  double points[3][2] =   { {polygon_vertex(o, i1)[0], polygon_vertex(o, i1)[1]},
-                            {polygon_vertex(o, i2)[0], polygon_vertex(o, i2)[1]},
-                            {polygon_vertex(o, i3)[0], polygon_vertex(o, i3)[1]}
+  double points[3][2] =   { {polygon_vertex_raw(o, i1)[0], polygon_vertex_raw(o, i1)[1]},
+                            {polygon_vertex_raw(o, i2)[0], polygon_vertex_raw(o, i2)[1]},
+                            {polygon_vertex_raw(o, i3)[0], polygon_vertex_raw(o, i3)[1]}
                           };
   struct matrix* triangle = matrix_create(2, 3, points);
   // 2. Does triangle contain any of the polygon vertices?
   for(unsigned i = 0; i < N - 3; i++) {
     unsigned idx = (i3 + i + 1) % N;
-    if(wn_PnPoly(polygon_vertex(o, idx), triangle)) {
+    if(wn_PnPoly(polygon_vertex_raw(o, idx), triangle)) {
       return false;
     }
   }
   return true;
 }
 
-bool GJK(struct polygon* o1, struct polygon* o2) {
+bool GJK(struct polygon* o1, struct polygon* o2, double simplex_ret[3][2]) {
   // 0. Initialize
   struct matrix* v12 = vector_new(3, 0.0);
   struct matrix* v13 = vector_new(3, 0.0);
@@ -142,15 +144,65 @@ bool GJK(struct polygon* o1, struct polygon* o2) {
         n -= 1;
         d2 = *n31;
       } else {
+        if(simplex_ret) {
+          simplex_ret[0][0] = simplex[0]->data[0];
+          simplex_ret[0][1] = simplex[0]->data[1];
+          simplex_ret[1][0] = simplex[1]->data[0];
+          simplex_ret[1][1] = simplex[1]->data[1];
+          simplex_ret[2][0] = simplex[2]->data[0];
+          simplex_ret[2][1] = simplex[2]->data[1];
+        }
         return true;
       }
     }
     i += 1;
   }
-  printf("AAARGH\n");
+  printf("GJK EXCEEDED MAX ITERATIONS!!!!!!!!\n");
   return false;
 }
 
+struct matrix EPA(struct polygon* poly1, struct polygon* poly2, double simplex[3][2]) {
+  double tol = 1e-6;
+  unsigned iter = 0;
+  unsigned max_iterations = 100;
+  unsigned nVertices = 3;
+  struct polygon* poly = polygon_new(3, simplex);
+  struct matrix* penetration_vector = vector_new(3, 0);
+  while(iter < max_iterations && nVertices < EPA_MAX_VERTICES) {
+    int iClosest = closest_edge(nVertices, poly);
+    struct matrix e = polygon_edge(poly, iClosest);
+    struct matrix n = polygon_edge_normal(poly, iClosest);
+    struct matrix p = support_point(poly1, poly2, &n);
+    double d = vector_dot(&p, &n);
+    if((d - vector_norm(&e)) < tol) {
+      *penetration_vector = matrix_multiply_scalar(&n, d);
+      return *penetration_vector;
+    } else {
+      polygon_insert_vertex(poly, p.data, iClosest);
+    }
+    iter += 1;
+  }
+  printf("EPA EXCEEDED MAX ITERATIONS!!!!!!!!\n");
+  return *penetration_vector;
+}
+
+
+int closest_edge(unsigned N, struct polygon* poly) {
+  double closest = 1e10;
+  int iClosest = -1;
+  for(unsigned i = 0; i < N; i++) {
+    struct matrix e = polygon_edge(poly, i);
+    struct matrix p1 = polygon_vertex(poly, i);
+    struct matrix n = triple_cross_product(&e, &p1, &e);
+    n = vector_normalize(&n);
+    double d = vector_dot(&n, &p1);
+    if(d < closest) {
+      closest = d;
+      iClosest = i;
+    }
+  }
+  return iClosest;
+}
 
 struct matrix furthest_point(struct polygon* o, struct matrix* dir) {
   double largest_dot = vector_dot_raw(matrix_col_raw(&o->vertices, 0), dir->data, 3);

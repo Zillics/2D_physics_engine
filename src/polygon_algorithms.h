@@ -39,7 +39,13 @@ void ear_clipping(struct polygon* o, struct polygon* ears, unsigned* nEars);
 bool is_an_ear(struct polygon* o, int i);
 
 /** Gilbert–Johnson–Keerthi distance algorithm */
-bool GJK(struct polygon* o1, struct polygon* o2);
+bool GJK(struct polygon* o1, struct polygon* o2, double simplex_ret[3][2]); 
+
+/** Expanding polytope algorithm. */
+struct matrix EPA(struct polygon* poly1, struct polygon* poly2, double simplex_ret[3][2]);
+
+int closest_edge(unsigned N, struct polygon* poly);
+
 bool handle_simplex(struct matrix* simplex[3], struct matrix* d);
 bool line_case(struct matrix* p1, struct matrix* p2, struct matrix* d);
 bool triangle_case(struct matrix* p1, struct matrix* p2, struct matrix* d);

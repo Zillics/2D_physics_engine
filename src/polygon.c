@@ -37,8 +37,8 @@ struct polygon* polygon_copy(struct polygon* o) {
   unsigned nVertices = polygon_nVertices(o);
   double vertices[nVertices][2];
   for(unsigned i = 0; i < nVertices; i++) {
-    vertices[i][0] = polygon_vertex(o, i)[0];
-    vertices[i][1] = polygon_vertex(o, i)[1];
+    vertices[i][0] = polygon_vertex_raw(o, i)[0];
+    vertices[i][1] = polygon_vertex_raw(o, i)[1];
   }
   return polygon_new(nVertices, vertices);
 }
@@ -47,8 +47,8 @@ struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsign
   double vertices[nVertices][2];
   for(unsigned i = 0; i < nVertices; i++) {
     unsigned vi = vertex_idx[i];
-    vertices[i][0] = polygon_vertex(o, vi)[0];
-    vertices[i][1] = polygon_vertex(o, vi)[1];
+    vertices[i][0] = polygon_vertex_raw(o, vi)[0];
+    vertices[i][1] = polygon_vertex_raw(o, vi)[1];
   }
   return polygon_new(nVertices, vertices);
 }
@@ -109,18 +109,45 @@ void polygon_remove_vertex(struct polygon* o, unsigned idx) {
   o->area = polygon_area(o);
 }
 
+void polygon_insert_vertex(struct polygon* poly, double* v, unsigned idx) {
+  unsigned nVertices = polygon_nVertices(poly);
+  struct matrix* new_vertices = matrix_new(3, nVertices + 1, 1.0);
+  // 1. Copy vertices before index
+  if(idx > 0) {
+    memcpy(new_vertices->data, poly->vertices.data, sizeof(double) * 3 * idx);
+  }
+  // 2. Insert new vertex at index
+  matrix_col_raw(new_vertices, idx)[0] = v[0];
+  matrix_col_raw(new_vertices, idx)[1] = v[1];
+  // 3. Copy remaining vertices after index
+  unsigned leftOvers = nVertices - idx;
+  if(leftOvers > 0) {
+    memcpy(matrix_col_raw(new_vertices, idx + 1), poly->vertices.data, sizeof(double) * 3 * leftOvers);
+  }
+  assert(vertices_clockwise(new_vertices));
+  poly->vertices = *new_vertices;
+  polygon_recompute_edge_normals(poly, poly->edge_normals_inward);
+  polygon_recompute_edge_midpoints(poly);
+  polygon_centroid(poly, poly->centroid.data, poly->centroid.data + 1);
+  poly->area = polygon_area(poly);
+}
+
 unsigned polygon_nVertices(struct polygon* o) {
   return o->vertices.cols;
 }
-double* polygon_vertex(struct polygon* o, unsigned i) {
+double* polygon_vertex_raw(struct polygon* o, unsigned i) {
   assert(polygon_nVertices(o) > i);
   return o->vertices.data + i * o->vertices.rows;
 }
 
+struct matrix polygon_vertex(struct polygon* o, unsigned i) {
+   return *vector_create(polygon_vertex_raw(o, i), 3); 
+}
+
 void polygon_edge_raw(struct polygon* o, unsigned i, double* p1, double* p2) {
   unsigned N = polygon_nVertices(o);
-  p1 = polygon_vertex(o, i);
-  p2 = polygon_vertex(o, (i + 1) % N);
+  p1 = polygon_vertex_raw(o, i);
+  p2 = polygon_vertex_raw(o, (i + 1) % N);
 }
 
 struct matrix polygon_edge_normal(struct polygon* o, unsigned i) {
@@ -141,8 +168,8 @@ struct matrix polygon_compute_edge_normal(struct polygon* o, unsigned i, bool in
   struct matrix* n = matrix_new(3, 1, 0.0);
   // Swap x and y axes to get normal
   unsigned i2 = (i + 1) % polygon_nVertices(o);
-  *matrix_element(n, 0, 0) = polygon_vertex(o, i2)[0] - polygon_vertex(o, i)[0];
-  *matrix_element(n, 1, 0) = polygon_vertex(o, i2)[1] - polygon_vertex(o, i)[1];
+  *matrix_element(n, 0, 0) = polygon_vertex_raw(o, i2)[0] - polygon_vertex_raw(o, i)[0];
+  *matrix_element(n, 1, 0) = polygon_vertex_raw(o, i2)[1] - polygon_vertex_raw(o, i)[1];
   matrix_rotate(n, dir * 90);
   struct matrix ret = unit_vector(n);
   *matrix_element(&ret, 2, 0) = 1.0;
@@ -152,8 +179,8 @@ struct matrix polygon_compute_edge_normal(struct polygon* o, unsigned i, bool in
 struct matrix polygon_compute_edge_midpoint(struct polygon* o, unsigned i) {
   struct matrix* m = matrix_new(3, 1, 0.0);
   unsigned i2 = (i + 1) % polygon_nVertices(o);
-  double* p1 = polygon_vertex(o, i);
-  double* p2 = polygon_vertex(o, i2);
+  double* p1 = polygon_vertex_raw(o, i);
+  double* p2 = polygon_vertex_raw(o, i2);
   *matrix_element(m, 0, 0) = 0.5 * (p1[0] + p2[0]);
   *matrix_element(m, 1, 0) = 0.5 * (p1[1] + p2[1]);
   *matrix_element(m, 2, 0) = 1.0;
@@ -190,8 +217,8 @@ void polygon_centroid(struct polygon* o, double* x, double* y) {
   *y = 0.0;
   unsigned N = polygon_nVertices(o);
   for(unsigned int i = 0; i < N; i++) {
-    *x += polygon_vertex(o, i)[0];
-    *y += polygon_vertex(o, i)[1];
+    *x += polygon_vertex_raw(o, i)[0];
+    *y += polygon_vertex_raw(o, i)[1];
   }
   *x /= (double)N;
   *y /= (double)N;
@@ -200,7 +227,7 @@ void polygon_centroid(struct polygon* o, double* x, double* y) {
 struct matrix polygon_edge(struct polygon* o, unsigned i1) {
   unsigned N = polygon_nVertices(o);
   unsigned i2 = (i1 + 1) % N;
-  return vector_subtract_raw(polygon_vertex(o, i2), polygon_vertex(o, i1), 3);
+  return vector_subtract_raw(polygon_vertex_raw(o, i2), polygon_vertex_raw(o, i1), 3);
 }
 
 double polygon_edge_angle(struct polygon* o, unsigned i1, unsigned i2) {
@@ -316,7 +343,7 @@ void polygon_render(struct polygon* o, SDL_Renderer* renderer) {
 void polygon_render_vertex(struct polygon* o, SDL_Renderer* renderer, unsigned i1) {
   unsigned N = polygon_nVertices(o);
   unsigned i2 = (i1 + 1) % N;
-  SDL_RenderDrawLine(renderer, polygon_vertex(o, i1)[0], polygon_vertex(o, i1)[1], polygon_vertex(o, i2)[0], polygon_vertex(o, i2)[1]);
+  SDL_RenderDrawLine(renderer, polygon_vertex_raw(o, i1)[0], polygon_vertex_raw(o, i1)[1], polygon_vertex_raw(o, i2)[0], polygon_vertex_raw(o, i2)[1]);
 }
 
 size_t polygon_size(struct polygon* o) {
@@ -329,25 +356,35 @@ size_t polygon_size(struct polygon* o) {
 void polygon_print(struct polygon* o) {
   printf("Polygon of %d vertices:\n", polygon_nVertices(o));
   for(unsigned i = 0; i < polygon_nVertices(o); i++) {
-    printf("\t(%f, %f)\n", polygon_vertex(o, i)[0], polygon_vertex(o, i)[1]);
+    printf("\t(%f, %f)\n", polygon_vertex_raw(o, i)[0], polygon_vertex_raw(o, i)[1]);
   }
   printf("-----------------------------\n");
 }
 
 
 bool polygons_collide(struct polygon* o1, struct polygon* o2) {
-  return GJK(o1, o2);
+  return GJK(o1, o2, NULL);
+}
+
+bool polygons_collide_penetration(struct polygon* o1, struct polygon* o2, struct matrix* penetration) {
+  double simplex[3][2];
+  if(GJK(o1, o2, simplex)) {
+    *penetration = EPA(o1, o2, simplex);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 double polygon_area(struct polygon* o) {
   double area = 0.0;
   struct matrix* p1 = matrix_new(3, 1, 0.0);
-  matrix_insert_col(p1, polygon_vertex(o, 0), 0.0);
+  matrix_insert_col(p1, polygon_vertex_raw(o, 0), 0.0);
   for(unsigned i = 1; i < polygon_nVertices(o) - 1; i++) {
     struct matrix* p2 = matrix_new(3, 1, 0.0);
-    matrix_insert_col(p2, polygon_vertex(o, i), 0.0);
+    matrix_insert_col(p2, polygon_vertex_raw(o, i), 0.0);
     struct matrix* p3 = matrix_new(3, 1, 0.0);
-    matrix_insert_col(p3, polygon_vertex(o, i + 1), 0.0);
+    matrix_insert_col(p3, polygon_vertex_raw(o, i + 1), 0.0);
     double ai = triangle_area(p1, p2, p3);
     area += ai;
   }
@@ -356,11 +393,11 @@ double polygon_area(struct polygon* o) {
 
 double polygon_moment_of_inertia(struct polygon* o, double ro) {
   double I = 0.0;
-  struct matrix* p1 = vector_create(polygon_vertex(o, 0), 3);
+  struct matrix* p1 = vector_create(polygon_vertex_raw(o, 0), 3);
   for(unsigned i = 1; i < polygon_nVertices(o) - 1; i++) {
     // Define points of triangle
-    struct matrix* p2 = vector_create(polygon_vertex(o, i), 3);
-    struct matrix* p3 = vector_create(polygon_vertex(o, i+1), 3);
+    struct matrix* p2 = vector_create(polygon_vertex_raw(o, i), 3);
+    struct matrix* p3 = vector_create(polygon_vertex_raw(o, i+1), 3);
 
     // Find out p4
     struct matrix v2 = matrix_subtract(p2, p1);

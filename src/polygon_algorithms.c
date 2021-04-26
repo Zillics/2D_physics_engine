@@ -79,7 +79,7 @@ bool is_an_ear(struct polygon* o, int i2) {
   return true;
 }
 
-bool GJK(struct polygon* o1, struct polygon* o2, double simplex_ret[3][2]) {
+bool GJK(struct polygon* o1, struct polygon* o2, struct matrix** simplex) {
   // 0. Initialize
   struct matrix* v12 = vector_new(3, 0.0);
   struct matrix* v13 = vector_new(3, 0.0);
@@ -91,10 +91,6 @@ bool GJK(struct polygon* o1, struct polygon* o2, double simplex_ret[3][2]) {
   struct matrix* v32 = vector_new(3, 0.0);
   struct matrix* v31 = vector_new(3, 0.0);
   struct matrix* v3o = vector_new(3, 0.0);
-  struct matrix* p1 = vector_new(3, 0.0);
-  struct matrix* p2 = vector_new(3, 0.0);
-  struct matrix* p3 = vector_new(3, 0.0);
-  struct matrix* simplex[3] = { p1, p2, p3 };
   unsigned n = 0;
   unsigned i = 0;
   unsigned max_iterations = 100;
@@ -144,14 +140,6 @@ bool GJK(struct polygon* o1, struct polygon* o2, double simplex_ret[3][2]) {
         n -= 1;
         d2 = *n31;
       } else {
-        if(simplex_ret) {
-          simplex_ret[0][0] = simplex[0]->data[0];
-          simplex_ret[0][1] = simplex[0]->data[1];
-          simplex_ret[1][0] = simplex[1]->data[0];
-          simplex_ret[1][1] = simplex[1]->data[1];
-          simplex_ret[2][0] = simplex[2]->data[0];
-          simplex_ret[2][1] = simplex[2]->data[1];
-        }
         return true;
       }
     }
@@ -161,21 +149,30 @@ bool GJK(struct polygon* o1, struct polygon* o2, double simplex_ret[3][2]) {
   return false;
 }
 
-struct matrix EPA(struct polygon* poly1, struct polygon* poly2, double simplex[3][2]) {
+struct matrix EPA(struct polygon* poly1, struct polygon* poly2, struct matrix** simplex) {
   double tol = 1e-6;
   unsigned iter = 0;
   unsigned max_iterations = 100;
   unsigned nVertices = 3;
-  struct polygon* poly = polygon_new(3, simplex);
+  // TODO: Sort points in clockwise order
+  struct polygon* poly = polygon_new2(3, simplex);
+  polygon_print(poly);
   struct matrix* penetration_vector = vector_new(3, 0);
+  double origin[2] = { 0.0, 0.0 };
   while(iter < max_iterations && nVertices < EPA_MAX_VERTICES) {
+    printf("ITER: %d\n", iter);
     int iClosest = closest_edge(nVertices, poly);
     struct matrix e = polygon_edge(poly, iClosest);
     struct matrix n = polygon_edge_normal(poly, iClosest);
+    n = vector_normalize(&n);
     struct matrix p = support_point(poly1, poly2, &n);
-    double d = vector_dot(&p, &n);
-    if((d - vector_norm(&e)) < tol) {
-      *penetration_vector = matrix_multiply_scalar(&n, d);
+    // Distance from support point to origin along edge normal
+    double dp = vector_dot(&p, &n);
+    // Distance from polytope edge to origin
+    double de = polygon_edge_distance(poly, iClosest, origin);
+
+    if(fabs(dp - de) < tol) {
+      *penetration_vector = matrix_multiply_scalar(&n, dp);
       return *penetration_vector;
     } else {
       polygon_insert_vertex(poly, p.data, iClosest);

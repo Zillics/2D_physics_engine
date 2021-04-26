@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+struct matrix;
 
 /** Returns random double in range of 0...1 */
 double frand();
@@ -22,5 +23,8 @@ int modulo(int x, int N);
 /** Sort array, consisting of N doubles */
 void dsort(double* arr, unsigned N);
 int dcomp(const void* _a, const void* _b);
+
+void clockwise_sort(unsigned N, struct matrix** points);
+int clockwise_comp(const void* _a, const void* _b);
 
 #endif

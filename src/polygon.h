@@ -19,6 +19,7 @@ struct polygon {
 
 struct polygon* new_square(int x, int y, unsigned width);
 struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2]);
+struct polygon* polygon_new2(unsigned nVertices, struct matrix** vertices);
 struct polygon* polygon_copy(struct polygon* o);
 struct polygon* polygon_create_sub(struct polygon* o, unsigned nVertices, unsigned* vertix_idx);
 /** Randomly generate a simple polygon of N vertices. */
@@ -41,9 +42,12 @@ struct matrix polygon_edge(struct polygon* o, unsigned i);
  * @return angle in radians between edge 1 and edge 2
  * */
 double polygon_edge_angle(struct polygon* o, unsigned i1, unsigned i2);
+/** Compute distance from polygon edge i to point p. */
+double polygon_edge_distance(struct polygon* poly, unsigned i, double* p);
 /** Find normal vector of vertix between point i and point i + 1. 
  * Set inward to true/false to specify whether normal points inward/outward. */
 struct matrix polygon_edge_normal(struct polygon* o, unsigned i);
+double* polygon_edge_normal_raw(struct polygon* o, unsigned i);
 struct matrix polygon_edge_midpoint(struct polygon* o, unsigned i);
 struct matrix polygon_compute_edge_normal(struct polygon* o, unsigned i, bool inward);
 struct matrix polygon_compute_edge_midpoint(struct polygon* o, unsigned i);

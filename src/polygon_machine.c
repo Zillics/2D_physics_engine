@@ -316,6 +316,18 @@ void polygon_machine_handle_key_down(struct polygon_machine* self, SDL_Event* ev
       }
       break;
     }
+    case SDL_SCANCODE_A:
+    {
+      unsigned N = self->n_draw_vertices;
+      struct matrix* polytope[N];
+      for(unsigned i = 0; i < N; i++) {
+        polytope[i] = vector_new(3, 0.0);
+        polytope[i]->data[0] = self->draw_vertices[i][0];
+        polytope[i]->data[1] = self->draw_vertices[i][1];
+      }
+      struct polygon* poly = polygon_new2(N, polytope);
+      polygon_container_append(&self->polygons, poly);
+    }
     default:
       break;
   }

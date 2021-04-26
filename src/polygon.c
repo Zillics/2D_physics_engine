@@ -16,11 +16,10 @@ struct polygon* new_square(int x, int y, unsigned width) {
 
 struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2]) {
   struct polygon* o = malloc(sizeof(struct polygon));
-  o->vertices = *matrix_new(3, nVertices, 0.0);
+  o->vertices = *matrix_new(3, nVertices, 1.0);
   for(unsigned i = 0; i < nVertices; i++) {
     *matrix_element(&o->vertices, 0, i) = vertices[i][0];
     *matrix_element(&o->vertices, 1, i) = vertices[i][1];
-    *matrix_element(&o->vertices, 2, i) = 1.0; // 1.0 for making vertices homogenous
   }
   assert(vertices_clockwise(&o->vertices));
   bool inward = false;
@@ -31,6 +30,25 @@ struct polygon* polygon_new(unsigned nVertices, double vertices[nVertices][2]) {
   o->centroid = *c;
   o->area = polygon_area(o);
   return o;
+}
+
+struct polygon* polygon_new2(unsigned nVertices, struct matrix** vertices) {
+  clockwise_sort(nVertices, vertices);
+  struct polygon* poly = malloc(sizeof(struct polygon));
+  poly->vertices = *matrix_new(3, nVertices, 1.0);
+  for(unsigned i = 0; i < nVertices; i++) {
+    *matrix_element(&poly->vertices, 0, i) = vertices[i]->data[0];
+    *matrix_element(&poly->vertices, 1, i) = vertices[i]->data[1];
+  }
+  assert(vertices_clockwise(&poly->vertices));
+  bool inward = false;
+  polygon_recompute_edge_normals(poly, inward);
+  polygon_recompute_edge_midpoints(poly);
+  struct matrix* c = vector_new(3, 1.0);
+  polygon_centroid(poly, vector_element(c, 0), vector_element(c, 1));
+  poly->centroid = *c;
+  poly->area = polygon_area(poly);
+  return poly;
 }
 
 struct polygon* polygon_copy(struct polygon* o) {
@@ -150,6 +168,10 @@ void polygon_edge_raw(struct polygon* o, unsigned i, double* p1, double* p2) {
   p2 = polygon_vertex_raw(o, (i + 1) % N);
 }
 
+double* polygon_edge_normal_raw(struct polygon* o, unsigned i) {
+  return matrix_col_raw(&o->edge_normals, i);
+}
+
 struct matrix polygon_edge_normal(struct polygon* o, unsigned i) {
   return matrix_col(&o->edge_normals, i);
 }
@@ -230,6 +252,12 @@ struct matrix polygon_edge(struct polygon* o, unsigned i1) {
   return vector_subtract_raw(polygon_vertex_raw(o, i2), polygon_vertex_raw(o, i1), 3);
 }
 
+double polygon_edge_distance(struct polygon* poly, unsigned i, double* p) {
+  double e1p[2] = { p[0] - polygon_vertex_raw(poly, i)[0], p[1] - polygon_vertex_raw(poly, i)[1] };
+  double* n = polygon_edge_normal_raw(poly, i);
+  return vector_dot_raw(e1p, n, 2) / vector_norm_L2_raw(n, 2);
+}
+
 double polygon_edge_angle(struct polygon* o, unsigned i1, unsigned i2) {
   unsigned N = polygon_nVertices(o);
   struct matrix e1 = polygon_edge(o, i1);
@@ -276,21 +304,8 @@ bool vertices_intersect(struct matrix* verts) {
 }
 
 bool vertices_clockwise(struct matrix* verts) {
-  // TODO: understand why this works
-  // stole the solution from: https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order#:~:text=If%20the%20determinant%20is%20negative,q%20and%20r%20are%20collinear.
-  double sum = 0.0;
-  unsigned N = verts->cols;
-  for(unsigned i1 = 0; i1 < N; i1++) {
-    unsigned i2 = (i1 + 1) % N;
-    double *p1 = matrix_col_raw(verts, i1);
-    double *p2 = matrix_col_raw(verts, i2);
-    sum += (p2[0] - p1[0]) * (p2[1] + p1[1]);
-  }
-  if(sum < 0) {
-    return false;
-  } else {
-    return true;
-  }
+  // TODO
+  return true;
 }
 
 bool polygon_contains(struct polygon* o, double* p) {
@@ -363,11 +378,12 @@ void polygon_print(struct polygon* o) {
 
 
 bool polygons_collide(struct polygon* o1, struct polygon* o2) {
-  return GJK(o1, o2, NULL);
+  struct matrix* simplex[3] = { vector_new(3, 0.0), vector_new(3, 0.0), vector_new(3, 0.0) };
+  return GJK(o1, o2, simplex);
 }
 
 bool polygons_collide_penetration(struct polygon* o1, struct polygon* o2, struct matrix* penetration) {
-  double simplex[3][2];
+  struct matrix* simplex[3] = { vector_new(3, 0.0), vector_new(3, 0.0), vector_new(3, 0.0) };
   if(GJK(o1, o2, simplex)) {
     *penetration = EPA(o1, o2, simplex);
     return true;
